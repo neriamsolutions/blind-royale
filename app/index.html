@@ -1,0 +1,331 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Poker Nights</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=Figtree:wght@400;500;600;700&family=Yellowtail&family=Schibsted+Grotesk:wght@800&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head><body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#c8423a"/><g stroke="#f6f0e0" stroke-width="7" stroke-dasharray="7.85 7.85" fill="none"><circle cx="32" cy="32" r="26.5"/></g><circle cx="32" cy="32" r="19" fill="#16130f" stroke="#f6f0e0" stroke-width="1.5" stroke-dasharray="2 2.5"/><path d="M32 18c-5 6-11 9-11 14.5 0 3.4 2.6 5.7 5.6 5.7 1.9 0 3.4-.9 4.2-2.1-.4 3-1.7 5.3-3.6 6.9h9.6c-1.9-1.6-3.2-3.9-3.6-6.9.8 1.2 2.3 2.1 4.2 2.1 3 0 5.6-2.3 5.6-5.7C43 27 37 24 32 18z" fill="#ff4f6d"/></svg>
+      <div class="wordmark">
+        <h1><span class="poker">POKER</span><span class="nights">Nights</span></h1>
+        <div class="sub"><span id="tName">Home Game</span><span class="nm-sign"><span class="by">by</span><span class="nm-lock" role="img" aria-label="NerIAm"><svg class="nm-eclipse" viewBox="10 18 68 52" aria-hidden="true"><path d="M41.68 20.68A24 24 0 1 0 41.68 67.32A25.5 25.5 0 0 1 41.68 20.68Z" fill="#F8FAFC"/><path d="M47.95 20.35A24 24 0 1 1 47.95 67.65A26.5 26.5 0 0 0 47.95 20.35Z" fill="#3B82F6"/></svg><span class="nm-word">ner<span>IA</span>m</span></span></span></div>
+      </div>
+    </div>
+    <div class="top-right">
+    <div class="mode-switch" id="modeSwitch" role="group"><button type="button" data-mode="tournament" id="modeT"></button><button type="button" data-mode="cash" id="modeC"></button></div>
+    <button class="lang-btn" id="btnLang" type="button">ES</button>
+    <nav class="tabs" role="tablist" aria-label="Secciones">
+      <button role="tab" id="tab-clock" aria-selected="true" data-view="clock">Reloj</button>
+      <button role="tab" id="tab-table" class="t-only" aria-selected="false" data-view="table">Mesa</button>
+      <button role="tab" id="tab-bank" class="c-only" aria-selected="false" data-view="bank"></button>
+      <button role="tab" id="tab-structure" class="t-only" aria-selected="false" data-view="structure">Estructura</button>
+      <button role="tab" id="tab-live" class="f-only" aria-selected="false" data-view="live">En vivo</button>
+      <button role="tab" id="tab-history" aria-selected="false" data-view="history">Historial</button>
+      <button role="tab" id="tab-me" aria-selected="false" data-view="me">Mi perfil</button>
+      <button role="tab" id="tab-setup" aria-selected="false" data-view="setup">Ajustes</button>
+    </nav>
+    </div>
+  </header>
+
+  <!-- RELOJ -->
+  <section id="view-clock">
+    <div class="clock-grid">
+      <div class="main-col">
+      <div class="rail"><div class="stage" id="stage">
+        <span class="paused-tag" id="pausedTag">En pausa</span>
+        <div class="tv-brand" aria-hidden="true"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#c8423a"/><g stroke="#f6f0e0" stroke-width="7" stroke-dasharray="7.85 7.85" fill="none"><circle cx="32" cy="32" r="26.5"/></g><circle cx="32" cy="32" r="19" fill="#16130f" stroke="#f6f0e0" stroke-width="1.5" stroke-dasharray="2 2.5"/><path d="M32 18c-5 6-11 9-11 14.5 0 3.4 2.6 5.7 5.6 5.7 1.9 0 3.4-.9 4.2-2.1-.4 3-1.7 5.3-3.6 6.9h9.6c-1.9-1.6-3.2-3.9-3.6-6.9.8 1.2 2.3 2.1 4.2 2.1 3 0 5.6-2.3 5.6-5.7C43 27 37 24 32 18z" fill="#ff4f6d"/></svg><span>Poker Nights</span><span class="nm-sign"><span class="by">by</span><span class="nm-lock" role="img" aria-label="NerIAm"><svg class="nm-eclipse" viewBox="10 18 68 52" aria-hidden="true"><path d="M41.68 20.68A24 24 0 1 0 41.68 67.32A25.5 25.5 0 0 1 41.68 20.68Z" fill="#F8FAFC"/><path d="M47.95 20.35A24 24 0 1 1 47.95 67.65A26.5 26.5 0 0 0 47.95 20.35Z" fill="#3B82F6"/></svg><span class="nm-word">ner<span>IA</span>m</span></span></span></div>
+        <div class="stage-head">
+          <div class="pcard" id="pcard" aria-hidden="true"><span class="r" id="pcR1">1<small>♠</small></span><span class="s" id="pcS">♠</span><span class="r b" id="pcR2">1<small>♠</small></span></div>
+          <div class="lvl-text"><span class="lvl-label" id="lvlLabel">Nivel</span><span class="lvl-num" id="lvlNum">1</span></div>
+        </div>
+        <div class="timer" id="timer" aria-live="off">20:00</div>
+        <div class="track" aria-hidden="true"><div class="progress"><i id="bar"></i></div><span class="dealer" id="dealer">L</span></div>
+        <div class="blinds-label" id="blindsLabel">Ciegas</div>
+        <div class="blinds" id="blinds">25 / 50</div>
+        <div class="ante" id="ante"></div>
+        <div class="next" id="next"></div>
+        <div class="controls">
+          <button class="btn" id="btnPrev" title="Nivel anterior (←)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg>Anterior</button>
+          <button class="btn primary" id="btnPlay" title="Iniciar / pausar (espacio)">Iniciar</button>
+          <button class="btn" id="btnNext" title="Siguiente nivel (→)">Siguiente<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+        </div>
+        <div class="controls" style="margin-top:8px">
+          <button class="btn small" id="btnMinus">−1 min</button>
+          <button class="btn small" id="btnPlus">+1 min</button>
+          <button class="btn small" id="btnRestartLvl">Reiniciar nivel</button>
+          <button class="btn small on" id="btnSound" aria-pressed="true">Sonido: sí</button>
+          <button class="btn small" id="btnVoice" aria-pressed="false">Voz: no</button>
+          <button class="btn small" id="btnFs">Pantalla completa</button>
+          <button class="btn small" id="btnTv">Modo TV</button>
+        </div>
+      </div></div>
+
+        <div class="panel statbar">
+          <h2>Mesa</h2>
+          <div class="stats">
+            <div class="stat"><div class="k">Jugadores</div><div class="v" id="sPlayers">8 / 8</div></div>
+            <div class="stat"><div class="k">Stack promedio</div><div class="v" id="sAvg">10,000</div></div>
+            <div class="stat"><div class="k">Bote de premios</div><div class="v" id="sPool">$160</div></div>
+            <div class="stat"><div class="k">Prom. en ciegas</div><div class="v" id="sBB">200 BB</div></div>
+            <div class="stat"><div class="k">Próximo break</div><div class="v" id="sBreak">—</div></div>
+            <div class="stat"><div class="k">Tiempo jugado</div><div class="v" id="sElapsed">0:00</div></div>
+          </div>
+        </div>
+      </div>
+      <aside class="side">
+        <div class="panel" hidden>
+          <h2>Jugadores</h2>
+          <div class="counter"><span class="name">Entradas<small>Quienes pagaron buy-in</small></span><span class="stepper"><button data-step="entries" data-d="-1" aria-label="Quitar entrada">−</button><output id="cEntries">8</output><button data-step="entries" data-d="1" aria-label="Agregar entrada">+</button></span></div>
+          <div class="counter"><span class="name">Siguen jugando<small>Resta uno al eliminar</small></span><span class="stepper"><button data-step="remaining" data-d="-1" aria-label="Eliminar jugador">−</button><output id="cRemaining">8</output><button data-step="remaining" data-d="1" aria-label="Regresar jugador">+</button></span></div>
+          <div class="counter" id="rowRebuys"><span class="name">Recompras<small id="rebuyHint">Hasta el nivel 4</small></span><span class="stepper"><button data-step="rebuys" data-d="-1" aria-label="Quitar recompra">−</button><output id="cRebuys">0</output><button data-step="rebuys" data-d="1" aria-label="Agregar recompra">+</button></span></div>
+          <div class="counter" id="rowAddons"><span class="name">Add-ons<small>En el primer break</small></span><span class="stepper"><button data-step="addons" data-d="-1" aria-label="Quitar add-on">−</button><output id="cAddons">0</output><button data-step="addons" data-d="1" aria-label="Agregar add-on">+</button></span></div>
+        </div>
+        <div class="panel">
+          <h2>Premios</h2>
+          <ul class="payouts" id="payouts"></ul>
+        </div>
+        <div class="panel">
+          <h2>Lo que sigue</h2>
+          <ul class="upcoming" id="upcoming"></ul>
+        </div>
+        <div class="panel">
+          <h2>Valor de las fichas</h2>
+          <ul class="chiplegend" id="chipLegend"></ul>
+        </div>
+        <div class="panel">
+          <h2>Ranking de manos</h2>
+          <ol class="hands" id="hands"></ol>
+        </div>
+      </aside>
+    </div>
+    <p class="footnote">Atajos con teclado: <kbd>Espacio</kbd> iniciar o pausar, <kbd>←</kbd> <kbd>→</kbd> cambiar nivel. La configuración y el reloj se guardan en este navegador, así que si recargas la página el torneo sigue donde iba.</p>
+    <div class="brandline"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#c8423a"/><g stroke="#f6f0e0" stroke-width="7" stroke-dasharray="7.85 7.85" fill="none"><circle cx="32" cy="32" r="26.5"/></g><circle cx="32" cy="32" r="19" fill="#16130f" stroke="#f6f0e0" stroke-width="1.5" stroke-dasharray="2 2.5"/><path d="M32 18c-5 6-11 9-11 14.5 0 3.4 2.6 5.7 5.6 5.7 1.9 0 3.4-.9 4.2-2.1-.4 3-1.7 5.3-3.6 6.9h9.6c-1.9-1.6-3.2-3.9-3.6-6.9.8 1.2 2.3 2.1 4.2 2.1 3 0 5.6-2.3 5.6-5.7C43 27 37 24 32 18z" fill="#ff4f6d"/></svg><span>Poker Nights</span><span class="nm-sign"><span class="by">by</span><span class="nm-lock" role="img" aria-label="NerIAm"><svg class="nm-eclipse" viewBox="10 18 68 52" aria-hidden="true"><path d="M41.68 20.68A24 24 0 1 0 41.68 67.32A25.5 25.5 0 0 1 41.68 20.68Z" fill="#F8FAFC"/><path d="M47.95 20.35A24 24 0 1 1 47.95 67.65A26.5 26.5 0 0 0 47.95 20.35Z" fill="#3B82F6"/></svg><span class="nm-word">ner<span>IA</span>m</span></span></span></div>
+  </section>
+
+  <!-- MESA -->
+  <section id="view-table" hidden>
+    <div class="section-head">
+      <div>
+        <h2>Las mesas</h2>
+        <p>Toca un asiento vacío para sentar a alguien, o toca a un jugador para eliminarlo, darle recompra o moverle el botón. Con más de 10 jugadores se abre una segunda mesa.</p>
+      </div>
+    </div>
+    <div class="table-area">
+      <div style="min-width:0">
+        <div class="tbl-switch" id="tblSwitch" hidden></div>
+        <div class="tbl-alert" id="tblAlert" hidden><span id="tblAlertText"></span><button class="btn small" id="tblAlertBtn" type="button"></button></div>
+        <div style="padding-inline:clamp(20px,5vw,48px)">
+        <div class="ptable" id="ptable">
+          <div class="rail"><div class="felt"><div class="felt-center"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#c8423a"/><g stroke="#f6f0e0" stroke-width="7" stroke-dasharray="7.85 7.85" fill="none"><circle cx="32" cy="32" r="26.5"/></g><circle cx="32" cy="32" r="19" fill="#16130f" stroke="#f6f0e0" stroke-width="1.5" stroke-dasharray="2 2.5"/><path d="M32 18c-5 6-11 9-11 14.5 0 3.4 2.6 5.7 5.6 5.7 1.9 0 3.4-.9 4.2-2.1-.4 3-1.7 5.3-3.6 6.9h9.6c-1.9-1.6-3.2-3.9-3.6-6.9.8 1.2 2.3 2.1 4.2 2.1 3 0 5.6-2.3 5.6-5.7C43 27 37 24 32 18z" fill="#ff4f6d"/></svg><span class="big" id="tblCount">0 jugando</span><span class="small" id="tblSub"></span></div></div></div>
+        </div>
+        </div>
+      </div>
+      <aside class="side">
+        <div class="panel">
+          <h2>Sentar jugador</h2>
+          <form class="addrow" id="addForm"><input type="text" id="addName" placeholder="Nombre" maxlength="18" aria-label="Nombre del jugador" autocomplete="off"><button class="btn small" type="submit">Agregar</button></form>
+          <p class="summary-line" id="addHint" style="margin:8px 0 0;font-size:13px">Se sienta en el primer asiento libre y cuenta como una entrada.</p>
+        </div>
+        <div class="panel" id="selPanel" hidden>
+          <h2>Jugador</h2>
+          <div class="sel-card">
+            <span class="who" id="selName"></span>
+            <span class="meta" id="selMeta"></span>
+            <div class="sel-actions" id="selActions"></div>
+          </div>
+        </div>
+        <div class="panel deal" id="dealPanel" hidden data-notr></div>
+        <div class="panel">
+          <h2>Eliminados</h2>
+          <ul class="outlist" id="outList"></ul>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ESTRUCTURA -->
+  <section id="view-structure" hidden>
+    <div class="section-head">
+      <div>
+        <h2>Estructura de ciegas</h2>
+        <p>Edita cualquier valor y se guarda solo. El ante es de ciega grande (lo paga solo quien está en BB); deja 0 para no usar ante.</p>
+      </div>
+      <div class="toolbar" style="margin-top:0">
+        <select id="presetSel" aria-label="Estructura sugerida">
+          <option value="noante" selected>Estándar sin ante · niveles de 20 min (~4 h)</option>
+          <option value="std">Estándar con ante · niveles de 20 min (~4 h)</option>
+          <option value="turbo">Turbo · niveles de 15 min (~3 h)</option>
+          <option value="slow">Tranquilo · niveles de 25 min (~5 h)</option>
+        </select>
+        <button class="btn small" id="btnPreset">Cargar estructura</button>
+        <button class="btn small" id="btnFav" data-notr></button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Tipo</th><th>Ciega chica</th><th>Ciega grande</th><th>Ante (BB)</th><th>Minutos</th><th>Empieza a</th><th></th></tr></thead>
+        <tbody id="structBody"></tbody>
+      </table>
+    </div>
+    <div class="toolbar">
+      <button class="btn small" id="btnAddLevel">+ Agregar nivel</button>
+      <button class="btn small" id="btnAddBreak">+ Agregar break</button>
+      <span style="flex:1"></span>
+      <label class="check" style="font-weight:500">Cambiar todos los niveles a <input type="number" id="allMin" min="1" max="120" value="20" style="width:72px"> min</label>
+      <button class="btn small" id="btnAllMin">Aplicar</button>
+    </div>
+    <p class="summary-line" id="structSummary"></p>
+  </section>
+
+  <!-- CASH: mesa en pantalla grande -->
+  <section id="view-cashclock" hidden></section>
+  <!-- CASH: caja -->
+  <section id="view-bank" hidden></section>
+
+  <!-- AJUSTES -->
+  <section id="view-history" hidden data-notr></section>
+  <section id="view-me" hidden data-notr></section>
+  <section id="view-live" hidden data-notr></section>
+  <section id="view-setup" hidden>
+    <div class="section-head">
+      <div>
+        <h2 class="t-only">Ajustes del torneo</h2>
+        <p class="t-only">Los valores iniciales son una sugerencia para un home game de 8 personas. Cámbialos a tu gusto; todo se guarda en este dispositivo.</p>
+        <div class="c-only" id="cashSetHead"></div>
+      </div>
+    </div>
+    <div class="stack-gap">
+      <div class="panel">
+        <h2>General</h2>
+        <div class="form-grid">
+          <div class="field"><label for="fName">Texto debajo de Poker Nights</label><input type="text" id="fName"></div>
+          <div class="field"><label for="fCur">Moneda</label><input type="text" id="fCur" maxlength="4"></div>
+          <div class="field t-only"><label for="fBuyin">Buy-in</label><input type="number" id="fBuyin" min="0" step="1"></div>
+          <div class="field t-only"><label for="fStack">Stack inicial (fichas)</label><input type="number" id="fStack" min="100" step="100"></div>
+        </div>
+      </div>
+      <div class="c-only" id="cashSettings"></div>
+      <div class="panel t-only">
+        <h2>Recompras y add-on</h2>
+        <div class="form-grid">
+          <label class="check"><input type="checkbox" id="fRebuyOn"> Permitir recompras</label>
+          <div class="field"><label for="fRebuyCost">Costo de recompra</label><input type="number" id="fRebuyCost" min="0"></div>
+          <div class="field"><label for="fRebuyStack">Fichas por recompra</label><input type="number" id="fRebuyStack" min="0" step="100"></div>
+          <div class="field"><label for="fRebuyUntil">Recompras sugeridas hasta el nivel</label><input type="number" id="fRebuyUntil" min="1"><span class="hint">Es solo un aviso: el botón de recompra sigue disponible toda la noche.</span></div>
+          <label class="check"><input type="checkbox" id="fAddonOn"> Permitir add-on</label>
+          <div class="field"><label for="fAddonCost">Costo del add-on</label><input type="number" id="fAddonCost" min="0"></div>
+          <div class="field"><label for="fAddonStack">Fichas del add-on</label><input type="number" id="fAddonStack" min="0" step="100"></div>
+        </div>
+      </div>
+      <div class="panel t-only">
+        <h2>Reparto de premios</h2>
+        <div class="form-grid">
+          <div class="field"><label for="fPayouts">Porcentajes por lugar</label><input type="text" id="fPayouts" placeholder="50, 30, 20"><span class="hint" id="payHint">Separados por coma. Deben sumar 100.</span></div>
+        </div>
+      </div>
+      <div class="panel t-only">
+        <h2>Fichas por jugador</h2>
+        <div class="table-wrap" style="border:0;background:transparent">
+          <table style="min-width:420px"><thead><tr><th>Color</th><th>Valor</th><th>Cantidad</th><th>Subtotal</th><th></th></tr></thead><tbody id="chipBody"></tbody></table>
+        </div>
+        <div class="toolbar"><button class="btn small" id="btnAddChip">+ Agregar ficha</button></div>
+        <p class="summary-line" id="chipSummary"></p>
+      </div>
+      <div class="panel t-only">
+        <h2>Torneo</h2>
+        <p style="margin:0 0 10px;color:var(--muted)">"Nueva noche" vacía las mesas y pone el reloj en el nivel 1. "Reiniciar torneo" hace lo mismo pero deja sentados a los jugadores. La estructura y los ajustes se conservan en los dos casos.</p>
+        <div class="toolbar" style="margin-top:0">
+          <button class="btn danger" id="btnNewNight">Nueva noche</button>
+          <button class="btn danger" id="btnReset">Reiniciar torneo</button>
+          <button class="btn" id="btnDefaults">Restaurar valores sugeridos</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<button class="btn small tv-exit" id="tvExit" type="button">Salir del modo TV</button>
+
+<div class="ov" id="welcome" hidden>
+  <div class="ov-in">
+    <svg class="logo big" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#c8423a"/><g stroke="#f6f0e0" stroke-width="7" stroke-dasharray="7.85 7.85" fill="none"><circle cx="32" cy="32" r="26.5"/></g><circle cx="32" cy="32" r="19" fill="#16130f" stroke="#f6f0e0" stroke-width="1.5" stroke-dasharray="2 2.5"/><path d="M32 18c-5 6-11 9-11 14.5 0 3.4 2.6 5.7 5.6 5.7 1.9 0 3.4-.9 4.2-2.1-.4 3-1.7 5.3-3.6 6.9h9.6c-1.9-1.6-3.2-3.9-3.6-6.9.8 1.2 2.3 2.1 4.2 2.1 3 0 5.6-2.3 5.6-5.7C43 27 37 24 32 18z" fill="#ff4f6d"/></svg>
+    <div class="wm"><span class="poker">POKER</span><span class="nights">Nights</span></div>
+    <div class="eyebrow" id="wTitle">Home Game</div>
+    <div class="date" id="wDate"></div>
+    <div class="wpick" id="wPick" data-notr>
+      <div class="wq" id="wQ"></div>
+      <div class="wopts">
+        <button class="wopt" type="button" data-m="tournament"><span class="wico" aria-hidden="true">♛</span><b>Tournament night</b><small id="wTsub"></small></button>
+        <button class="wopt cash" type="button" data-m="cash"><span class="wico" aria-hidden="true">$</span><b>Cash night</b><small id="wCsub"></small></button>
+      </div>
+    </div>
+    <div class="wmain" id="wMain" hidden>
+      <div class="wkind" id="wKind" data-notr></div>
+      <div class="facts" id="wFacts"></div>
+      <div class="names" id="wNames"></div>
+      <button class="btn deal" id="btnDeal" type="button">Shuffle up and deal</button>
+      <button class="linkbtn" id="btnWelcomeSkip" type="button">Ajustar algo antes de empezar</button>
+      <button class="linkbtn" id="btnWelcomeBack" type="button" data-notr></button>
+    </div>
+    <div style="margin-top:6px"><span class="nm-sign"><span class="by">by</span><span class="nm-lock" role="img" aria-label="NerIAm"><svg class="nm-eclipse" viewBox="10 18 68 52" aria-hidden="true"><path d="M41.68 20.68A24 24 0 1 0 41.68 67.32A25.5 25.5 0 0 1 41.68 20.68Z" fill="#F8FAFC"/><path d="M47.95 20.35A24 24 0 1 1 47.95 67.65A26.5 26.5 0 0 0 47.95 20.35Z" fill="#3B82F6"/></svg><span class="nm-word">ner<span>IA</span>m</span></span></span></div>
+  </div>
+</div>
+
+<div class="ov gl" id="gl" hidden>
+  <div class="ov-in" style="gap:18px">
+    <div class="gl-sign">¡Buena suerte a todos!</div>
+    <div class="gl-sub">Que gane la mejor mano</div>
+  </div>
+</div>
+
+<div class="ov ko" id="ko" hidden data-notr>
+  <div class="ko-bg"></div>
+  <svg class="ko-bolt" viewBox="0 0 100 400" preserveAspectRatio="none" aria-hidden="true"><polyline points="58,0 44,62 63,70 36,150 58,158 30,246 52,252 40,320 60,326 47,400"/></svg>
+  <svg class="ko-bolt b2" viewBox="0 0 100 400" preserveAspectRatio="none" aria-hidden="true"><polyline points="44,62 22,104 34,110 12,170"/><polyline points="58,158 82,196 72,202 92,262"/></svg>
+  <div class="ko-fh" aria-hidden="true"><span>All in</span></div>
+  <i class="ko-ring"></i><i class="ko-ring r2" style="--k:4"></i>
+  <div class="ko-flash"></div>
+  <div class="ko-in">
+    <div class="ko-name" id="koName"><span class="h h1"></span><span class="h h2"></span><i class="ko-slash"></i></div>
+    <div class="ko-fat" id="koFat"></div>
+    <div class="ko-place" id="koPlace"></div>
+    <div class="ko-extra" id="koExtra"></div>
+  </div>
+</div>
+
+<div class="ov lvlup" id="lvlup" hidden>
+  <div class="ov-in">
+    <div class="pcard" id="luCard"><span class="r" id="luR1"></span><span class="s" id="luS"></span><span class="r b" id="luR2"></span></div>
+    <div class="lu-text">
+      <div class="eyebrow" id="luLabel">Suben las ciegas</div>
+      <div class="lu-blinds" id="luBlinds"></div>
+      <div class="lu-sub" id="luSub"></div>
+    </div>
+  </div>
+</div>
+
+<div class="ov champ" id="champ" hidden>
+  <div class="ch-rays" aria-hidden="true"></div>
+  <div class="ch-spot" aria-hidden="true"></div>
+  <div class="ov-in ch-in">
+    <div class="ch-chip" aria-hidden="true"><div class="ch-chip-inner"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#c8423a"/><g stroke="#f6f0e0" stroke-width="7" stroke-dasharray="7.85 7.85" fill="none"><circle cx="32" cy="32" r="26.5"/></g><circle cx="32" cy="32" r="19" fill="#16130f" stroke="#f6f0e0" stroke-width="1.5" stroke-dasharray="2 2.5"/><path d="M32 18c-5 6-11 9-11 14.5 0 3.4 2.6 5.7 5.6 5.7 1.9 0 3.4-.9 4.2-2.1-.4 3-1.7 5.3-3.6 6.9h9.6c-1.9-1.6-3.2-3.9-3.6-6.9.8 1.2 2.3 2.1 4.2 2.1 3 0 5.6-2.3 5.6-5.7C43 27 37 24 32 18z" fill="#ff4f6d"/></svg></div></div>
+    <div class="ch-title">Campeón</div>
+    <div class="eyebrow ch-ey">Campeón de la noche</div>
+    <div class="champ-name" id="chName"></div>
+    <div class="champ-prize" id="chPrize"></div>
+    <div class="ch-titles" id="chTitles" data-notr></div>
+    <div class="podium" id="chPodium"></div>
+    <button class="btn ch-close" id="chClose" type="button">Cerrar</button>
+    <div class="brandline ch-brand"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#c8423a"/><g stroke="#f6f0e0" stroke-width="7" stroke-dasharray="7.85 7.85" fill="none"><circle cx="32" cy="32" r="26.5"/></g><circle cx="32" cy="32" r="19" fill="#16130f" stroke="#f6f0e0" stroke-width="1.5" stroke-dasharray="2 2.5"/><path d="M32 18c-5 6-11 9-11 14.5 0 3.4 2.6 5.7 5.6 5.7 1.9 0 3.4-.9 4.2-2.1-.4 3-1.7 5.3-3.6 6.9h9.6c-1.9-1.6-3.2-3.9-3.6-6.9.8 1.2 2.3 2.1 4.2 2.1 3 0 5.6-2.3 5.6-5.7C43 27 37 24 32 18z" fill="#ff4f6d"/></svg><span>Poker Nights</span><span class="nm-sign"><span class="by">by</span><span class="nm-lock" role="img" aria-label="NerIAm"><svg class="nm-eclipse" viewBox="10 18 68 52" aria-hidden="true"><path d="M41.68 20.68A24 24 0 1 0 41.68 67.32A25.5 25.5 0 0 1 41.68 20.68Z" fill="#F8FAFC"/><path d="M47.95 20.35A24 24 0 1 1 47.95 67.65A26.5 26.5 0 0 0 47.95 20.35Z" fill="#3B82F6"/></svg><span class="nm-word">ner<span>IA</span>m</span></span></span></div>
+  </div>
+  <div class="ch-flash" aria-hidden="true"></div>
+</div>
+<canvas id="confetti" hidden></canvas>
+
+<script src="app.js"></script>
+
+</body></html>
