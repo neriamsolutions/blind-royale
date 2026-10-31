@@ -151,8 +151,6 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 /* Modo de juego */
 body.mode-cash .t-only{display:none!important}
 body:not(.mode-cash) .c-only{display:none!important}
-body:not(.friend) .f-only{display:none!important}
-body.friend #tab-clock,body.friend #tab-table,body.friend #tab-bank,body.friend #tab-structure,body.friend #tab-setup,body.friend #modeSwitch,body.friend [data-h="add"],body.friend [data-h="del"],body.friend .hform{display:none!important}
 /* Mi perfil */
 .me-pick{display:flex;flex-wrap:wrap;gap:8px}
 .me-hero{display:flex;align-items:center;gap:14px}
@@ -180,14 +178,7 @@ body.friend #tab-clock,body.friend #tab-table,body.friend #tab-bank,body.friend 
 .me-table .me-of{color:var(--muted);font-weight:400;font-size:12px}
 .me-tag{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--brass-2);border:1px solid var(--brass);border-radius:6px;padding:1px 5px;margin-left:4px}
 a.btn{text-decoration:none}
-.me-codebox{background:var(--felt-3);border:1px dashed var(--line);border-radius:10px;padding:10px 12px;margin:10px 0;overflow-wrap:anywhere}
-.me-codebox code{font-size:14px;color:var(--brass-2)}
-.me-links{display:flex;flex-direction:column;gap:8px;margin-top:10px}
-.me-link{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;border-radius:10px;background:var(--felt-3)}
-.me-link b{min-width:90px}.me-link .ok{color:#7fd6a1;font-size:13px;flex:1}
-.me-link input{flex:1 1 120px;min-width:0;background:var(--felt);border:1px solid var(--line);border-radius:8px;color:var(--ivory);padding:7px 9px;font:13px var(--body)}
-.me-link input.bad{border-color:#ff9fb1}
-/* En vivo */
+/* TODO v2: En vivo — estilos de la vista en vivo, guardados para retomarla.
 .lv-top{display:flex;align-items:center;gap:8px;margin:2px 0 12px;font-size:13px;color:var(--muted)}
 .lv-top b{color:#ff6b7f;letter-spacing:.14em;font-size:12px}.lv-name{color:var(--ivory);font-weight:700}.lv-upd{margin-left:auto}
 .lv-dot{width:10px;height:10px;border-radius:50%;background:#ff4f6d;box-shadow:0 0 0 0 rgba(255,79,109,.7);animation:lvPulse 1.6s infinite}
@@ -211,6 +202,7 @@ a.btn{text-decoration:none}
 .lv-p.me{border-color:var(--brass);box-shadow:0 0 0 1px var(--brass)}
 .lv-p.out{opacity:.6;text-decoration:line-through;text-decoration-color:rgba(255,255,255,.35)}
 .lv-n{color:var(--muted);font-size:15px;margin-left:4px}.lv-h3{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px}
+*/
 
 .mode-switch{display:flex;background:var(--felt-2);border:1px solid var(--line);border-radius:999px;padding:4px;gap:2px}
 .mode-switch button{border:0;background:transparent;color:var(--muted);font-weight:700;font-size:13px;letter-spacing:.04em;padding:7px 12px;border-radius:999px;cursor:pointer;min-height:36px}

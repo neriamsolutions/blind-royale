@@ -35,7 +35,7 @@ if(rawCfg&&!rawCfg.anteMig){cfg.anteMig=true;
   save(KEY_CFG,cfg);}
 if(!Array.isArray(st.players)) st.players=[];
 if(!cfg.name||/martes/i.test(cfg.name)) cfg.name="Home Game";
-const saveCfg=()=>{save(KEY_CFG,cfg);liveQueue();}, saveSt=()=>{save(KEY_ST,st);liveQueue();};
+const saveCfg=()=>save(KEY_CFG,cfg), saveSt=()=>save(KEY_ST,st);
 
 // ---------- Sonido ----------
 let ac=null;
@@ -449,12 +449,11 @@ function show(v){
   const cash=cfg.mode==="cash";
   if(cash&&(v==="table"||v==="structure")) v="clock";
   if(!cash&&v==="bank") v="clock";
-  if(document.body.classList.contains("friend")&&!["me","history","live"].includes(v)) v="me";
   document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.view===v)));
-  ["clock","table","structure","setup","bank","cashclock","history","me","live"].forEach(x=>$("view-"+x).hidden=true);
+  ["clock","table","structure","setup","bank","cashclock","history","me"].forEach(x=>$("view-"+x).hidden=true);
   $("view-"+(cash&&v==="clock"?"cashclock":v)).hidden=false;
   if(cash) renderCash();
-  if(v==="history") renderHistory(); if(v==="me") renderMe(); if(v==="live") renderLive(); if(v==="table") renderTable(); if(v==="structure") renderStructure(); if(v==="setup") renderSetup();
+  if(v==="history") renderHistory(); if(v==="me") renderMe(); if(v==="table") renderTable(); if(v==="structure") renderStructure(); if(v==="setup") renderSetup();
   try{const sb=document.querySelector('nav.tabs button[aria-selected="true"]');if(sb&&sb.parentNode.scrollWidth>sb.parentNode.clientWidth)sb.parentNode.scrollLeft=Math.max(0,sb.offsetLeft-40);}catch(e){}
   try{sessionStorage.setItem("hgclock.view",v)}catch(e){}
 }
@@ -875,7 +874,7 @@ function stopConfetti(){cancelAnimationFrame(confRAF);const c=$("confetti");c.ge
 
 // ---------- Idioma (inglés por defecto) ----------
 let LANG="en"; try{LANG=localStorage.getItem("hgclock.lang")||"en"}catch(e){}
-const DICT={"Historial":"History","Mi perfil":"Profile","En vivo":"Live",
+const DICT={"Historial":"History","Mi perfil":"Profile",
 "Reloj":"Clock","Mesa":"Tables","Estructura":"Structure","Ajustes":"Settings","En pausa":"Paused","Nivel":"Level","Ciegas":"Blinds","Siguiente:":"Next:","Anterior":"Previous","Iniciar":"Start","Pausar":"Pause","Continuar":"Resume","Siguiente":"Next",
 "Reiniciar nivel":"Restart level","Sonido: sí":"Sound: on","Sonido: no":"Sound: off","Voz: sí":"Voice: on","Voz: no":"Voice: off","Pantalla completa":"Full screen","Salir de pantalla completa":"Exit full screen","No disponible aquí":"Not available here","Modo TV":"TV mode",
 "Jugadores":"Players","Stack promedio":"Average stack","Bote de premios":"Prize pool","Prom. en ciegas":"Avg. in big blinds","Próximo break":"Next break","Tiempo jugado":"Time played","Ahora":"Now",
@@ -1141,20 +1140,18 @@ setInterval(()=>{if(cfg.mode==="cash"){const el=$("csTime");if(el)el.textContent
 
 // ---------- Historial de torneos ----------
 const KEY_HIST="hgclock.history.v1";
-let HIST=load(KEY_HIST)||[], hdb=null, histAdd=false;
+let HIST=load(KEY_HIST)||[], histAdd=false;
 const nk=n=>String(n||"").trim().toLowerCase();
 const hDate=iso=>{try{const t=new Date(iso).toLocaleDateString(LANG==="en"?"en-US":"es-MX",{weekday:"short",day:"numeric",month:"short",year:"numeric"});return t.charAt(0).toUpperCase()+t.slice(1);}catch(e){return String(iso).slice(0,10);}};
 const hDur=ms=>{const m=Math.round((ms||0)/60000);return m<60?m+" min":Math.floor(m/60)+"h "+String(m%60).padStart(2,"0")+"m";};
 function histSorted(){return [...HIST].sort((a,b)=>String(b.date).localeCompare(String(a.date)));}
 function histLocal(){save(KEY_HIST,HIST);}
-async function histWrite(rec){
+function histWrite(rec){
   const i=HIST.findIndex(r=>r.id===rec.id); if(i>=0) HIST[i]=rec; else HIST.push(rec);
   histLocal(); renderHistory();
-  if(hdb){try{await hdb.doc("tournaments/"+rec.id).set(rec);}catch(e){}}
 }
-async function histDelete(id){
+function histDelete(id){
   HIST=HIST.filter(r=>r.id!==id); histLocal(); renderHistory();
-  if(hdb){try{await hdb.doc("tournaments/"+id).delete();}catch(e){}}
 }
 function recordTournament(w){
   if(!st.tid){st.tid="t"+Date.now();saveSt();}
@@ -1261,37 +1258,13 @@ $("view-history").addEventListener("submit",e=>{
   histAdd=false;
   histWrite({id:"m"+Date.now(),date:d+"T20:00:00",title:cfg.name||"Home Game",players:n,entries:n,rebuys:0,addons:0,pool,buyin:cfg.buyin,paid:ps.filter(x=>x>0).length,durationMs:0,lastLevel:0,cur:cur(),manual:true,results});
 });
-// Base de datos compartida del artefacto (si está disponible); si no, se queda en este dispositivo
-(async()=>{
-  try{
-    if(!window.claude||typeof window.claude.use!=="function") return;
-    const db=await window.claude.use("db"); if(!db) return;
-    hdb=db;
-    let first=true;
-    db.collection("tournaments").onSnapshot(snap=>{
-      const remote=snap.docs.map(d=>d.data()).filter(Boolean).map(r=>JSON.parse(JSON.stringify(r)));
-      if(first&&!snap.metadata.fromCache){
-        first=false;
-        const ids=new Set(remote.map(r=>r.id));
-        const missing=HIST.filter(r=>!ids.has(r.id));
-        (async()=>{for(const r of missing){try{await db.doc("tournaments/"+r.id).set(r);}catch(e){}}})();
-        HIST=remote.concat(missing);
-      } else HIST=remote.concat(first?HIST.filter(r=>!remote.some(x=>x.id===r.id)):[]);
-      histLocal(); renderHistory(); if(typeof renderMe==="function") renderMe();
-    },()=>{hdb=null;});
-  }catch(e){}
-})();
+// TODO v2: En vivo — sincronizar el historial (colección "tournaments") con el backend de cuentas.
 
 // ---------- Mi perfil: cada jugador ve sus torneos ----------
-// Quien abre la app con su cuenta de Claude: si Ramon vinculó esa cuenta a un nombre, se reconoce sola en cualquier dispositivo.
-// Si no, el jugador elige su nombre y se recuerda en este dispositivo.
+// El jugador elige su nombre y se recuerda en este dispositivo.
 const KEY_ME="hgclock.me";
-let ME={user:null,uid:null,canEdit:true,friend:false}, LINKS=[], linkDraft={}, meCopied=false;
 function myPick(){try{return localStorage.getItem(KEY_ME)||""}catch(e){return ""}}
-function myName(){
-  if(ME.uid){const l=LINKS.find(x=>x.uid===ME.uid); if(l) return {name:l.name,linked:true};}
-  const p=myPick(); return p?{name:p,linked:false}:null;
-}
+function myName(){const p=myPick(); return p?{name:p}:null;}
 function playerStats(name){
   const k=nk(name), rows=[];
   for(const r of histSorted()){const x=(r.results||[]).find(y=>nk(y.name)===k); if(x) rows.push({r,x});}
@@ -1306,7 +1279,7 @@ function playerStats(name){
   const S=histStats(); s.rank=S.list.findIndex(p=>nk(p.name)===k)+1; s.of=S.list.length;
   return s;
 }
-async function renderMe(){
+function renderMe(){
   const el=$("view-me"); if(!el||el.hidden) return;
   const c=cur(), money=v=>c+fmt(Math.round(v)), names=histStats().list.map(p=>p.name), me=myName();
   let h='';
@@ -1319,7 +1292,7 @@ async function renderMe(){
     const avg=s.played?s.sum/s.played:0, surv=s.surv.length?Math.round(s.surv.reduce((a,b)=>a+b,0)/s.surv.length*100):null;
     const ordS=n=>LANG==="en"?ordEn(n):n+".º";
     h+='<div class="panel me-hero"><div class="me-av" aria-hidden="true">'+esc(me.name.charAt(0).toUpperCase())+'</div><div class="me-id"><div class="me-name">'+esc(me.name)+'</div><div class="me-how">'+
-      (me.linked?'✓ '+T("Vinculado a tu cuenta de Claude","Linked to your Claude account"):T("Elegido en este dispositivo","Picked on this device")+' · <button class="linkbtn" data-me="change">'+T("Cambiar","Change")+'</button>')+'</div></div>'+
+      T("Elegido en este dispositivo","Picked on this device")+' · <button class="linkbtn" data-me="change">'+T("Cambiar","Change")+'</button>'+'</div></div>'+
       (s.rank?'<div class="me-rank"><span>'+T("En la tabla","Standing")+'</span><b>#'+s.rank+'</b><i>'+T("de ","of ")+s.of+'</i></div>':'')+'</div>';
     if(!s.played){h+='<div class="panel hempty"><p>'+T("Todavía no apareces en ningún torneo guardado.","You don't appear in any saved tournament yet.")+'</p></div>';}
     else{
@@ -1343,121 +1316,23 @@ async function renderMe(){
         s.rows.map(({r,x})=>{const n=(x.prize||0)-(x.spent||0);return '<tr><td>'+esc(hDate(r.date))+(r.deal?' <span class="me-tag">'+T("trato","deal")+'</span>':'')+'</td><td class="nm">'+(x.place===1?"♛ ":"")+ordS(x.place)+' <span class="me-of">'+T("de ","of ")+(r.players||"?")+'</span></td><td>'+(x.prize?money(x.prize):"—")+'</td><td class="'+(n>0?"pos":n<0?"neg":"")+'">'+(x.spent!=null?(n>0?"+":n<0?"−":"")+money(Math.abs(n)):"—")+'</td></tr>';}).join("")+
         '</tbody></table></div></div>';
     }
-    if(ME.uid&&!me.linked){
-      h+='<div class="panel me-code"><h2>'+T("Que te reconozca en cualquier dispositivo","Get recognized on any device")+'</h2><p>'+T("Manda tu código al organizador. Cuando lo vincule a tu nombre, la app te reconocerá sola cada vez que entres con tu cuenta de Claude.","Send your code to the host. Once they link it to your name, the app recognizes you every time you sign in with your Claude account.")+'</p>'+
-        '<div class="me-codebox"><code>'+esc(ME.uid)+'</code></div><div class="toolbar"><button class="btn small" data-me="copy">'+(meCopied?T("✓ Copiado","✓ Copied"):T("Copiar código","Copy code"))+'</button>'+
-        '<a class="btn small primary" target="_blank" rel="noopener" href="https://wa.me/?text='+encodeURIComponent("Poker Nights: "+T("soy ","I'm ")+me.name+". "+T("Mi código es ","My code is ")+ME.uid)+'">WhatsApp</a></div></div>';
-    }
   }
-  // Panel del organizador: vincular cuentas a nombres
-  if(ME.user&&ME.canEdit&&hdb&&names.length){
-    const ids=LINKS.map(l=>l.uid); let ps={}; try{ps=ids.length?await ME.user.profiles(ids):{};}catch(e){}
-    if($("view-me").hidden) return;
-    h+='<div class="panel me-admin"><h2>'+T("Cuentas de los jugadores","Player accounts")+'</h2><p>'+T("Pega el código que te mande cada jugador. Así su perfil lo reconoce en cualquier dispositivo. Solo tú ves esta sección.","Paste the code each player sends you, so their profile recognizes them on any device. Only you see this section.")+'</p><div class="me-links">'+
-      names.map(n=>{const l=LINKS.find(x=>nk(x.name)===nk(n)), p=l&&ps[l.uid];
-        return '<div class="me-link"><b>'+esc(n)+'</b>'+(l?'<span class="ok">✓ '+(p&&p.name?esc(p.name):T("Cuenta vinculada","Account linked"))+(l.uid===ME.uid?' ('+T("tú","you")+')':'')+'</span><button class="btn small" data-me="unlink" data-n="'+esc(n)+'">'+T("Quitar","Remove")+'</button>'
-          :'<input type="text" placeholder="'+T("Código del jugador","Player code")+'" data-me-code="'+esc(n)+'" value="'+esc(linkDraft[nk(n)]||"")+'" autocomplete="off" spellcheck="false"><button class="btn small" data-me="link" data-n="'+esc(n)+'">'+T("Vincular","Link")+'</button>'+(ME.uid&&!LINKS.some(x=>x.uid===ME.uid)?'<button class="linkbtn" data-me="linkme" data-n="'+esc(n)+'">'+T("Soy yo","That's me")+'</button>':''))+'</div>';}).join("")+'</div></div>';
-  }
+  // TODO v2: En vivo — panel del organizador para vincular cuentas de jugadores a nombres.
   if(!$("view-me").hidden) el.innerHTML=h;
 }
-async function saveLinks(next){
-  const prev=LINKS; LINKS=next; renderMe();
-  if(!hdb) return;
-  try{await hdb.doc("config/players").set({links:next});}catch(e){LINKS=prev;renderMe();}
-}
-$("view-me").addEventListener("input",e=>{const i=e.target.closest("[data-me-code]"); if(i) linkDraft[nk(i.dataset.meCode)]=i.value;});
 $("view-me").addEventListener("click",e=>{
   const b=e.target.closest("[data-me]"); if(!b) return; const a=b.dataset.me, n=b.dataset.n;
   if(a==="pick"){try{localStorage.setItem(KEY_ME,n)}catch(e){} renderMe(); window.scrollTo({top:0});}
   if(a==="change"){try{localStorage.removeItem(KEY_ME)}catch(e){} renderMe();}
-  if(a==="copy"){try{navigator.clipboard.writeText(ME.uid).then(()=>{meCopied=true;renderMe();setTimeout(()=>{meCopied=false;renderMe();},2000);});}catch(e){}}
-  if(a==="link"){const code=(linkDraft[nk(n)]||"").trim(); if(!/^u_[A-Za-z0-9_-]{10,}$/.test(code)){const i=document.querySelector('[data-me-code="'+CSS.escape(n)+'"]');if(i){i.classList.add("bad");i.focus();}return;}
-    delete linkDraft[nk(n)]; saveLinks(LINKS.filter(l=>nk(l.name)!==nk(n)&&l.uid!==code).concat([{name:n,uid:code}]));}
-  if(a==="linkme"&&ME.uid) saveLinks(LINKS.filter(l=>nk(l.name)!==nk(n)&&l.uid!==ME.uid).concat([{name:n,uid:ME.uid}]));
-  if(a==="unlink") saveLinks(LINKS.filter(l=>nk(l.name)!==nk(n)));
 });
-function enterFriendMode(){
-  ME.friend=true; document.body.classList.add("friend");
-  try{sessionStorage.setItem("hgclock.welcomed","1")}catch(e){}
-  if(!$("welcome").hidden) $("welcome").hidden=true;
-  const cur=document.querySelector('nav.tabs button[aria-selected="true"]');
-  if(!cur||!["me","history"].includes(cur.dataset.view)) show("me");
-}
-(async()=>{
-  try{
-    if(!window.claude||typeof window.claude.use!=="function") return;
-    const [u,db]=await Promise.all([window.claude.use("user"),window.claude.use("db")]);
-    if(u){ME.user=u; ME.uid=await u.id(); ME.canEdit=!!(await u.canEdit()); if(!ME.canEdit) enterFriendMode();}
-    if(db&&ME.friend) liveListen(db);
-    if(db) db.doc("config/players").onSnapshot(d=>{const v=d.exists?d.data():null; LINKS=v&&Array.isArray(v.links)?v.links.filter(l=>l&&l.name&&l.uid):[]; renderMe(); renderLive();},()=>{});
-    renderMe();
-  }catch(e){}
-})();
 
-// ---------- En vivo: el reloj del organizador se publica y los demás lo siguen en su celular ----------
-let liveT=null, LIVE=null, liveSeen=0;
-let liveArmed=false; ["pointerdown","keydown"].forEach(ev=>document.addEventListener(ev,()=>{liveArmed=true;},{capture:true,passive:true}));
-function liveQueue(){ try{ if(!hdb||!ME.canEdit||ME.friend||!(liveArmed||st.running)) return; clearTimeout(liveT); liveT=setTimeout(livePush,600); }catch(e){} }
-function livePush(){
-  if(!hdb||!ME.canEdit||ME.friend) return;
-  const alive=st.players.filter(p=>!p.out), started=st.running||st.elapsedMs>0||st.idx>0;
-  const champ=st.players.length>1&&alive.length===1&&st.remaining_p<=1?alive[0].name:null;
-  const doc={on:cfg.mode!=="cash"&&started,name:cfg.name||"Home Game",cur:cur(),idx:st.idx,
-    levels:cfg.levels.map(L=>L.t==="B"?{t:"B",min:+L.min}:{t:"L",sb:+L.sb,bb:+L.bb,ante:+L.ante||0,min:+L.min}),
-    running:!!st.running,endAt:st.endAt||0,remaining:remainingMs(),elapsedMs:st.elapsedMs||0,
-    entries:st.entries,left:st.remaining_p,rebuys:st.rebuys,pool:poolTotal(),payouts:cfg.payouts||[],chips:chipsTotal(),
-    rebuyOn:!!cfg.rebuyOn,rebuyUntil:cfg.rebuyUntil,
-    players:st.players.map(p=>({n:p.name,out:!!p.out,place:p.place||null,rb:p.rebuys||0})),champ,updatedAt:Date.now()};
-  hdb.doc("live/now").set(doc).catch(()=>{});
-}
-function liveRemaining(){ if(!LIVE) return 0; return LIVE.running?Math.max(0,LIVE.endAt-Date.now()):LIVE.remaining; }
-function liveFresh(){ return LIVE&&LIVE.on&&Date.now()-(LIVE.updatedAt||0)<10*3600000; }
-function renderLive(){
-  const el=$("view-live"); if(!el||el.hidden) return;
-  if(!liveFresh()){
-    el.innerHTML='<div class="panel hempty lv-none"><div class="hbig">♠</div><h2>'+T("No hay torneo en vivo ahora","No live tournament right now")+'</h2><p>'+T("Cuando el organizador arranque el reloj, aquí verás el nivel, las ciegas, el tiempo y quién sigue en pie.","When the host starts the clock, you'll see the level, blinds, time and who's still standing here.")+'</p><button class="btn small" data-lv="me">'+T("Ver mis torneos","See my tournaments")+'</button></div>';
-    return;
-  }
-  const L=LIVE, lv=L.levels||[], cl=lv[L.idx]||{}, c=L.cur||"$", m=v=>c+fmt(Math.round(v));
-  let lnum=0; for(let k=0;k<=L.idx&&k<lv.length;k++) if(lv[k].t==="L") lnum++;
-  const nxt=lv.slice(L.idx+1).find(x=>x.t==="L"), me=myName(), meK=me?nk(me.name):null;
-  const alive=L.players.filter(p=>!p.out), out=L.players.filter(p=>p.out).sort((a,b)=>(a.place||99)-(b.place||99));
-  const avg=L.left>0?L.chips/L.left:0, ps=L.payouts||[];
-  const blinds=cl.t==="B"?T("Descanso","Break"):fmt(cl.sb)+" / "+fmt(cl.bb);
-  let h='<div class="lv-top"><span class="lv-dot"></span><b>'+T("EN VIVO","LIVE")+'</b><span class="lv-name">'+esc(L.name)+'</span><span class="lv-upd" id="lvUpd"></span></div>';
-  if(L.champ){
-    h+='<div class="panel lv-champ"><div class="lv-crown">♛</div><div class="k">'+T("Campeón","Champion")+'</div><div class="v">'+esc(L.champ)+'</div>'+(ps[0]?'<div class="w">'+m(L.pool*ps[0]/100)+'</div>':'')+'</div>';
-  } else {
-    h+='<div class="panel lv-clock"><div class="lv-lvl">'+(cl.t==="B"?T("Descanso","Break"):T("Nivel ","Level ")+lnum)+'</div>'+
-      '<div class="lv-blinds">'+blinds+(cl.t==="L"&&cl.ante?'<small>'+T("Ante ","Ante ")+fmt(cl.ante)+'</small>':'')+'</div>'+
-      '<div class="lv-time" id="lvTime">'+mmss(liveRemaining())+'</div>'+
-      '<div class="lv-state" id="lvState">'+(L.running?"":T("⏸ En pausa","⏸ Paused"))+'</div>'+
-      (nxt?'<div class="lv-next">'+T("Siguiente: ","Next: ")+fmt(nxt.sb)+" / "+fmt(nxt.bb)+(nxt.ante?" ("+fmt(nxt.ante)+")":"")+'</div>':'')+'</div>';
-  }
-  h+='<div class="me-tiles lv-stats">'+
-    '<div class="me-tile"><div class="k">'+T("Jugadores","Players")+'</div><div class="v">'+L.left+'<small>/'+L.entries+'</small></div></div>'+
-    '<div class="me-tile"><div class="k">'+T("Stack promedio","Avg stack")+'</div><div class="v">'+fmt(avg)+'</div>'+(cl.t==="L"&&cl.bb?'<div class="w">'+fmt(avg/cl.bb)+' BB</div>':'')+'</div>'+
-    '<div class="me-tile gold"><div class="k">'+T("Bote","Prize pool")+'</div><div class="v">'+m(L.pool)+'</div>'+(L.rebuys?'<div class="w">'+L.rebuys+' '+T(L.rebuys===1?"recompra":"recompras",L.rebuys===1?"rebuy":"rebuys")+'</div>':'')+'</div>'+
-    '</div>';
-  if(ps.length) h+='<div class="panel"><h2>'+T("Premios","Payouts")+'</h2><ol class="lv-pay">'+ps.map((p,i)=>{const who=out.find(x=>x.place===i+1)||(L.champ&&i===0?{n:L.champ}:null);return '<li><span>'+(LANG==="en"?ordEn(i+1):(i+1)+".º")+'</span><b>'+m(L.pool*p/100)+'</b><i>'+(who?esc(who.n):"")+'</i></li>';}).join("")+'</ol></div>';
-  const chip=(p,cls)=>'<span class="lv-p'+(cls?" "+cls:"")+(meK&&nk(p.n)===meK?" me":"")+'">'+esc(p.n)+(meK&&nk(p.n)===meK?' <em>'+T("tú","you")+'</em>':'')+(p.rb?' <i>↻'+p.rb+'</i>':'')+(p.out&&p.place?' <i>'+(LANG==="en"?ordEn(p.place):p.place+".º")+'</i>':'')+'</span>';
-  h+='<div class="panel"><h2>'+T("Siguen en pie","Still standing")+' <span class="lv-n">'+alive.length+'</span></h2><div class="lv-ps">'+alive.map(p=>chip(p,"")).join("")+'</div>'+
-    (out.length?'<h3 class="lv-h3">'+T("Eliminados","Knocked out")+'</h3><div class="lv-ps">'+out.map(p=>chip(p,"out")).join("")+'</div>':'')+'</div>';
-  el.innerHTML=h; liveTickUI();
-}
-function liveTickUI(){
-  const t=$("lvTime"); if(t&&LIVE) t.textContent=mmss(liveRemaining());
-  const u=$("lvUpd"); if(u&&LIVE){const s=Math.round((Date.now()-LIVE.updatedAt)/1000); u.textContent=s<60?T("al momento","just now"):T("hace ","")+Math.round(s/60)+" min"+T(""," ago");}
-}
-$("view-live").addEventListener("click",e=>{const b=e.target.closest("[data-lv]"); if(b&&b.dataset.lv==="me") show("me");});
-setInterval(()=>{if(!$("view-live").hidden) liveTickUI();},250);
-function liveListen(db){
-  db.doc("live/now").onSnapshot(d=>{
-    const v=d.exists?d.data():null; LIVE=v&&Array.isArray(v.players)&&Array.isArray(v.levels)?JSON.parse(JSON.stringify(v)):null;
-    if(ME.friend&&liveFresh()&&!liveSeen){liveSeen=1; show("live");}
-    renderLive();
-  },()=>{});
-}
+// ---------- TODO v2: En vivo ----------
+// El organizador publicaba su reloj y los jugadores lo seguían en su celular (modo amigo, solo lectura).
+// Se publicaba al guardar cfg/st (debounce 600 ms) un documento live/now con: on, name, cur, idx,
+// levels[{t,sb,bb,ante,min}], running, endAt, remaining, elapsedMs, entries, left, rebuys, pool,
+// payouts, chips, rebuyOn, rebuyUntil, players[{n,out,place,rb}], champ, updatedAt.
+// La vista mostraba nivel, ciegas, tiempo, stack promedio, bote, premios y quién sigue en pie.
+// Implementación v1 completa en poker-nights-original.html (funciones live*: push, render, listen).
 
 // Mantener la pantalla encendida mientras corre el reloj
 let wake=null;
