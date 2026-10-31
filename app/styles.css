@@ -24,8 +24,8 @@ header.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-conte
 .logo{width:52px;height:52px;flex:none;filter:drop-shadow(0 0 10px var(--neon-glow))}
 .wordmark{display:flex;flex-direction:column;min-width:0}
 .wordmark h1{margin:0;display:flex;align-items:baseline;gap:4px;line-height:1;white-space:nowrap}
-.wordmark .poker{font-family:var(--display);font-weight:900;font-size:30px;letter-spacing:.2em;color:var(--ivory)}
-.wordmark .nights{font-family:var(--script);font-weight:400;font-size:38px;color:#ffd9df;display:inline-block;transform:rotate(-5deg) translateY(2px);
+.wordmark .wm-a{font-family:var(--display);font-weight:900;font-size:30px;letter-spacing:.2em;color:var(--ivory)}
+.wordmark .wm-b{font-family:var(--script);font-weight:400;font-size:38px;color:#ffd9df;display:inline-block;transform:rotate(-5deg) translateY(2px);
   text-shadow:0 0 4px var(--neon),0 0 12px var(--neon),0 0 28px var(--neon-glow);animation:flicker 6s infinite}
 @keyframes flicker{0%,93%,97%,100%{opacity:1}94%,96%{opacity:.55}}
 .wordmark .sub{display:flex;gap:10px;flex-wrap:wrap;align-items:baseline;margin-top:6px;font-size:12px;color:var(--muted)}
@@ -316,7 +316,7 @@ input[type=number]{font-variant-numeric:tabular-nums}
 .footnote{color:var(--muted);font-size:13px;margin-top:18px}
 kbd{font-family:var(--body);font-size:12px;border:1px solid var(--line);border-radius:5px;padding:1px 5px;background:var(--felt-3)}
 @media (max-width:520px){
-  .wordmark .poker{font-size:24px}.wordmark .nights{font-size:30px}.logo{width:42px;height:42px}
+  .wordmark .wm-a{font-size:24px}.wordmark .wm-b{font-size:30px}.logo{width:42px;height:42px}
   .rail{border-radius:40px;padding:9px}.stage{border-radius:32px}.stage::before{border-radius:24px;inset:10px}
   nav.tabs button{padding:6px 11px;font-size:13px}
   .top-right{min-width:0;max-width:100%}nav.tabs{max-width:100%;min-width:0;overflow-x:auto;scrollbar-width:none}nav.tabs::-webkit-scrollbar{display:none}nav.tabs button{flex:0 0 auto;padding:6px 9px}
@@ -330,8 +330,8 @@ kbd{font-family:var(--body);font-size:12px;border:1px solid var(--line);border-r
 .ov-in{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;max-width:640px;width:100%}
 .ov .logo.big{width:96px;height:96px}
 .ov .wm{display:flex;align-items:baseline;gap:8px;justify-content:center;flex-wrap:wrap}
-.ov .wm .poker{font-family:var(--display);font-weight:900;font-size:clamp(44px,9vw,72px);letter-spacing:.2em;line-height:1}
-.ov .wm .nights{font-family:var(--script);font-size:clamp(54px,11vw,88px);color:#ffd9df;transform:rotate(-5deg);display:inline-block;text-shadow:0 0 6px var(--neon),0 0 18px var(--neon),0 0 40px var(--neon-glow);line-height:1}
+.ov .wm .wm-a{font-family:var(--display);font-weight:900;font-size:clamp(44px,9vw,72px);letter-spacing:.2em;line-height:1}
+.ov .wm .wm-b{font-family:var(--script);font-size:clamp(54px,11vw,88px);color:#ffd9df;transform:rotate(-5deg);display:inline-block;text-shadow:0 0 6px var(--neon),0 0 18px var(--neon),0 0 40px var(--neon-glow);line-height:1}
 .ov .eyebrow{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--brass);font-weight:700}
 .ov .date{color:var(--muted);font-size:16px;text-transform:capitalize}
 .ov .facts{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 18px;color:var(--muted);font-size:15px}

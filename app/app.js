@@ -1,5 +1,10 @@
 (function(){
 "use strict";
+// Nombre de la app: cambiarlo aquí (y en manifest.webmanifest) lo cambia en todas partes.
+// El logo usa la primera palabra en la fuente de bloque y el resto en script neón.
+const APP_NAME="Blind Royale";
+(()=>{const [a,...b]=APP_NAME.split(" ");document.title=APP_NAME;
+  document.querySelectorAll("[data-app]").forEach(el=>el.textContent=el.dataset.app==="wm-a"?a.toUpperCase():el.dataset.app==="wm-b"?b.join(" "):APP_NAME);})();
 const KEY_CFG="hgclock.cfg.v1", KEY_ST="hgclock.state.v1", KEY_FAV="hgclock.fav.v1";
 const $=id=>document.getElementById(id);
 const fmt=n=>Math.round(n).toLocaleString("en-US");
@@ -47,7 +52,7 @@ function tone(freq,start,dur,vol){
   g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol||0.4,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
   o.connect(g).connect(a.destination); o.start(t); o.stop(t+dur+0.05);
 }
-// Identidad sonora de Poker Nights: fichas de cerámica + un piano eléctrico de lounge.
+// Identidad sonora de la app: fichas de cerámica + un piano eléctrico de lounge.
 // El motivo de la marca es La–Do#–Mi–La (sube como una apuesta que crece).
 const NOTE={A3:220,E4:329.6,A4:440,Cs5:554.4,E5:659.3,A5:880,Gs4:415.3,B4:493.9,D5:587.3,Fs5:740,Cs6:1108.7};
 let noiseBuf=null;
@@ -822,7 +827,7 @@ function champion(){
   const pz=(p,i)=>dAmt(p)!=null?cur()+fmt(dAmt(p)):prize(i);
   $("chName").textContent=w?w.name:"¡Tenemos campeón!";
   let titles=0; try{titles=w?recordTournament(w):0;}catch(e){}
-  $("chTitles").textContent=titles>1?T("Título número "+titles+" en Poker Nights","Poker Nights title #"+titles):titles===1?T("Primer título en Poker Nights","First Poker Nights title"):"";
+  $("chTitles").textContent=titles>1?T("Título número "+titles+" en "+APP_NAME,APP_NAME+" title #"+titles):titles===1?T("Primer título en "+APP_NAME,"First "+APP_NAME+" title"):"";
   $("chPrize").textContent=pz(w,0)?"Se lleva "+pz(w,0):"";
   if(st.deal) $("chTitles").textContent+=($("chTitles").textContent?" · ":"")+T("trato en la mesa final","final-table deal");
   const byPlace=k=>st.players.filter(p=>p.out&&p.place===k).slice(-1)[0];
@@ -836,7 +841,7 @@ function champion(){
   if(target){const t0=performance.now()+2200;(function up(t){const k=Math.min(1,Math.max(0,(t-t0)/1300));$("chPrize").textContent=pre+cur()+fmt(target*(1-Math.pow(1-k,3)));if(k<1&&!el.hidden)requestAnimationFrame(up);})(performance.now());}
   if(cfg.sound) champSound();
   setTimeout(()=>{ if(!$("champ").hidden) confetti(); },600);
-  if(cfg.voice&&w) setTimeout(()=>say(LANG==="en"?"Congratulations "+w.name+", Poker Nights champion.":"Felicidades "+w.name+", campeón de Poker Nights."),3200);
+  if(cfg.voice&&w) setTimeout(()=>say(LANG==="en"?"Congratulations "+w.name+", "+APP_NAME+" champion.":"Felicidades "+w.name+", campeón de "+APP_NAME+"."),3200);
 }
 $("chClose").onclick=()=>{$("champ").hidden=true;$("champ").classList.remove("show");stopConfetti();};
 function champSound(){
@@ -891,7 +896,7 @@ const DICT={"Historial":"History","Mi perfil":"Profile",
 "Tipo":"Type","Ciega chica":"Small blind","Ciega grande":"Big blind","Ante (BB)":"Ante (BB)","Minutos":"Minutes","Empieza a":"Starts at","Descanso":"Break","+ Agregar nivel":"+ Add level","+ Agregar break":"+ Add break","Cambiar todos los niveles a":"Set every level to","Aplicar":"Apply",
 "niveles y":"levels and","breaks,":"breaks,","de juego.":"of play.",
 "Ajustes del torneo":"Tournament settings","Los valores iniciales son una sugerencia para un home game de 8 personas. Cámbialos a tu gusto; todo se guarda en este dispositivo.":"The starting values are a suggestion for an 8-player home game. Change them however you like; everything is saved on this device.",
-"General":"General","Texto debajo de Poker Nights":"Text under Poker Nights","Moneda":"Currency","Buy-in":"Buy-in","Stack inicial (fichas)":"Starting stack (chips)","Recompras y add-on":"Rebuys and add-on","Permitir recompras":"Allow rebuys","Costo de recompra":"Rebuy cost","Fichas por recompra":"Chips per rebuy","Recompras hasta el nivel":"Rebuys until level","Recompras sugeridas hasta el nivel":"Rebuys suggested until level","Es solo un aviso: el botón de recompra sigue disponible toda la noche.":"Just a reminder: the rebuy button stays available all night.","Permitir add-on":"Allow add-on","Costo del add-on":"Add-on cost","Fichas del add-on":"Add-on chips",
+"General":"General","Texto debajo de":"Text under","Moneda":"Currency","Buy-in":"Buy-in","Stack inicial (fichas)":"Starting stack (chips)","Recompras y add-on":"Rebuys and add-on","Permitir recompras":"Allow rebuys","Costo de recompra":"Rebuy cost","Fichas por recompra":"Chips per rebuy","Recompras hasta el nivel":"Rebuys until level","Recompras sugeridas hasta el nivel":"Rebuys suggested until level","Es solo un aviso: el botón de recompra sigue disponible toda la noche.":"Just a reminder: the rebuy button stays available all night.","Permitir add-on":"Allow add-on","Costo del add-on":"Add-on cost","Fichas del add-on":"Add-on chips",
 "Reparto de premios":"Payout split","Porcentajes por lugar":"Percent per place","Separados por coma. Deben sumar 100.":"Separated by commas. They must add up to 100.","Suma 100%.":"Adds up to 100%.","Fichas por jugador":"Chips per player","Valor":"Value","Cantidad":"Count","Subtotal":"Subtotal","+ Agregar ficha":"+ Add chip","Total por jugador:":"Total per player:","Coincide con el stack inicial.":"Matches the starting stack.",
 "Torneo":"Tournament","Reinicia el reloj al nivel 1 y los contadores de jugadores. La estructura y los ajustes se conservan.":"Resets the clock to level 1 and the player counts. The structure and settings are kept.","Reiniciar torneo":"Reset tournament","Nueva noche":"New night","\"Nueva noche\" vacía las mesas y pone el reloj en el nivel 1. \"Reiniciar torneo\" hace lo mismo pero deja sentados a los jugadores. La estructura y los ajustes se conservan en los dos casos.":"\"New night\" clears the tables and sets the clock to level 1. \"Reset tournament\" does the same but keeps players seated. The structure and settings are kept either way.","Restaurar valores sugeridos":"Restore suggested values","¿Seguro? Toca otra vez":"Sure? Tap again","Listo":"Done",
 "Salir del modo TV":"Exit TV mode","jugadores":"players","fichas":"chips","buy-in":"buy-in","min por nivel":"min per level","para empezar":"to start","Ajustar algo antes de empezar":"Adjust something before starting",
@@ -1089,7 +1094,7 @@ function cashSummary(){
   const C=cfg.cash, t=totals(); let d="";
   try{d=new Date().toLocaleDateString(LANG==="en"?"en-US":"es-MX",{weekday:"long",day:"numeric",month:"long"});}catch(e){}
   const L=[];
-  L.push("♠ Poker Nights · Cash game"+(d?" · "+d:""));
+  L.push("♠ "+APP_NAME+" · Cash game"+(d?" · "+d:""));
   L.push(T("Ciegas ","Blinds ")+fm(C.sb)+"/"+fm(C.bb)+" · Buy-in "+fm(C.buyin)+" · "+T("Sesión ","Session ")+hms(sessMs()).replace(/:\d\d$/,""));
   L.push("");
   const res=cs.players.map(p=>({p,tin:pIn(p),res:p.cashout!=null?p.cashout-pIn(p):null})).sort((a,b)=>(b.res??-1e9)-(a.res??-1e9));
