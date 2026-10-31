@@ -1410,4 +1410,6 @@ renderCash(); if(cfg.mode==="cash") show("clock");
 if(!welcomed&&!cs.started&&freshGame()&&!st.running&&remainingMs()>=durMs(st.idx)) welcomeShow();
 try{const v=sessionStorage.getItem("hgclock.view"); if(v&&v!=="clock") show(v);}catch(e){}
 setInterval(tick,250);
+// PWA: el service worker guarda todo para que la app abra sin internet después de la primera visita
+if("serviceWorker" in navigator&&location.protocol!=="file:") window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js").catch(()=>{}));
 })();
