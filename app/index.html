@@ -242,6 +242,16 @@
           <button class="btn" id="btnDefaults">Restaurar valores sugeridos</button>
         </div>
       </div>
+      <div class="panel">
+        <h2>Respaldo</h2>
+        <p style="margin:0 0 10px;color:var(--muted)">Todo se guarda solo en este dispositivo. Descarga un respaldo de vez en cuando para no perder el historial si cambias de teléfono o borras el navegador.</p>
+        <div class="toolbar" style="margin-top:0">
+          <button class="btn" id="btnExport">Exportar respaldo</button>
+          <button class="btn" id="btnImport">Importar respaldo</button>
+          <input type="file" id="fImport" accept=".json,application/json" hidden>
+        </div>
+        <div id="importBox" data-notr hidden></div>
+      </div>
     </div>
   </section>
 </div>

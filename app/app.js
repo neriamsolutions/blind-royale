@@ -28,6 +28,11 @@ function freshState(){return {idx:0,running:false,endAt:0,remaining:null,entries
 
 function load(k){try{const s=localStorage.getItem(k);return s?JSON.parse(s):null}catch(e){return null}}
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+// Versión del esquema de datos guardados. Si un cambio futuro altera la forma de cfg/st/historial,
+// sube SCHEMA_V y agrega el paso en migrate(): corre antes de leer nada y también sobre respaldos importados.
+const SCHEMA_V=1, KEY_SCHEMA="hgclock.schema";
+function migrate(from){/* v1 es la primera versión: no hay pasos todavía. Ej.: if(from<2){…} */}
+(()=>{let v=0;try{v=+localStorage.getItem(KEY_SCHEMA)||0}catch(e){} if(v<SCHEMA_V){migrate(v);try{localStorage.setItem(KEY_SCHEMA,String(SCHEMA_V))}catch(e){}}})();
 FAV=load(KEY_FAV); if(!FAV||!Array.isArray(FAV.levels)||!FAV.levels.length) FAV=null;
 const rawCfg=load(KEY_CFG);
 let cfg=Object.assign(defaults(),rawCfg||{});
@@ -880,6 +885,8 @@ function stopConfetti(){cancelAnimationFrame(confRAF);const c=$("confetti");c.ge
 // ---------- Idioma (inglés por defecto) ----------
 let LANG="en"; try{LANG=localStorage.getItem("hgclock.lang")||"en"}catch(e){}
 const DICT={"Historial":"History","Mi perfil":"Profile",
+"Respaldo":"Backup","Exportar respaldo":"Export backup","Importar respaldo":"Import backup",
+"Todo se guarda solo en este dispositivo. Descarga un respaldo de vez en cuando para no perder el historial si cambias de teléfono o borras el navegador.":"Everything is saved only on this device. Download a backup now and then so you don't lose your history if you switch phones or clear the browser.",
 "Reloj":"Clock","Mesa":"Tables","Estructura":"Structure","Ajustes":"Settings","En pausa":"Paused","Nivel":"Level","Ciegas":"Blinds","Siguiente:":"Next:","Anterior":"Previous","Iniciar":"Start","Pausar":"Pause","Continuar":"Resume","Siguiente":"Next",
 "Reiniciar nivel":"Restart level","Sonido: sí":"Sound: on","Sonido: no":"Sound: off","Voz: sí":"Voice: on","Voz: no":"Voice: off","Pantalla completa":"Full screen","Salir de pantalla completa":"Exit full screen","No disponible aquí":"Not available here","Modo TV":"TV mode",
 "Jugadores":"Players","Stack promedio":"Average stack","Bote de premios":"Prize pool","Prom. en ciegas":"Avg. in big blinds","Próximo break":"Next break","Tiempo jugado":"Time played","Ahora":"Now",
@@ -1329,6 +1336,57 @@ $("view-me").addEventListener("click",e=>{
   const b=e.target.closest("[data-me]"); if(!b) return; const a=b.dataset.me, n=b.dataset.n;
   if(a==="pick"){try{localStorage.setItem(KEY_ME,n)}catch(e){} renderMe(); window.scrollTo({top:0});}
   if(a==="change"){try{localStorage.removeItem(KEY_ME)}catch(e){} renderMe();}
+});
+
+// ---------- Respaldo: exportar / importar todo lo guardado en este dispositivo ----------
+// JSON = objetos guardados con save(); RAW = cadenas sueltas (idioma, "quién soy").
+const BK_JSON={cfg:KEY_CFG,state:KEY_ST,fav:KEY_FAV,cash:KEY_CASH,history:KEY_HIST}, BK_RAW={lang:"hgclock.lang",me:KEY_ME};
+const BK_SHAPE={cfg:"object",state:"object",fav:"object",cash:"object",history:"array",lang:"string",me:"string"};
+let bkPending=null;
+function backupData(){
+  const data={}; Object.entries(BK_JSON).forEach(([k,key])=>{const v=load(key); if(v!=null) data[k]=v;});
+  Object.entries(BK_RAW).forEach(([k,key])=>{try{const v=localStorage.getItem(key); if(v!=null) data[k]=v;}catch(e){}});
+  return {app:"blind-royale",schemaV:SCHEMA_V,exportedAt:new Date().toISOString(),data};
+}
+function backupCheck(b){
+  if(!b||b.app!=="blind-royale"||!Number.isInteger(b.schemaV)||b.schemaV<1||!b.data||typeof b.data!=="object") return "bad";
+  if(b.schemaV>SCHEMA_V) return "newer";
+  for(const [k,v] of Object.entries(b.data)){const s=BK_SHAPE[k]; if(!s) continue;
+    if(s==="array"?!Array.isArray(v):s==="object"?(v===null||typeof v!=="object"||Array.isArray(v)):typeof v!==s) return "bad";}
+  return "";
+}
+function importBox(h){const el=$("importBox"); el.innerHTML=h||""; el.hidden=!h;}
+$("btnExport").onclick=()=>{
+  const b=backupData(), url=URL.createObjectURL(new Blob([JSON.stringify(b,null,1)],{type:"application/json"}));
+  const a=document.createElement("a"); a.href=url; a.download=APP_NAME.toLowerCase().replace(/\s+/g,"-")+"-"+T("respaldo","backup")+"-"+new Date().toLocaleDateString("en-CA")+".json";
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+  const btn=$("btnExport"), lbl=btn.textContent; btn.textContent=T("✓ Respaldo descargado","✓ Backup downloaded"); setTimeout(()=>btn.textContent=lbl,2200);
+};
+$("btnImport").onclick=()=>{importBox(""); $("fImport").value=""; $("fImport").click();};
+$("fImport").addEventListener("change",async()=>{
+  const f=$("fImport").files[0]; if(!f) return; let b=null;
+  try{b=JSON.parse(await f.text());}catch(e){}
+  const err=backupCheck(b);
+  if(err){bkPending=null; importBox('<p class="hint" style="color:#ff9fb1;margin:10px 0 0">'+(err==="newer"
+    ?T("Este respaldo viene de una versión más nueva de la app. Actualízala e inténtalo de nuevo.","This backup comes from a newer version of the app. Update it and try again.")
+    :T("Ese archivo no es un respaldo válido de ","That file is not a valid backup of ")+esc(APP_NAME)+".")+'</p>'); return;}
+  bkPending=b; const n=(b.data.history||[]).length, when=hDate(b.exportedAt);
+  importBox('<p style="margin:10px 0">'+T("Respaldo del ","Backup from ")+esc(when)+" · "+n+" "+T(n===1?"torneo":"torneos",n===1?"tournament":"tournaments")+'. <b>'+
+    T("Esto reemplaza todos los datos de este dispositivo: ajustes, torneo en curso, cash e historial.","This replaces all data on this device: settings, current tournament, cash game and history.")+'</b></p>'+
+    '<div class="toolbar" style="margin-top:0"><button class="btn danger" data-imp="ok">'+T("Reemplazar mis datos","Replace my data")+'</button><button class="btn" data-imp="no">'+T("Cancelar","Cancel")+'</button></div>');
+});
+$("importBox").addEventListener("click",e=>{
+  const b=e.target.closest("[data-imp]"); if(!b) return;
+  if(b.dataset.imp==="no"||!bkPending){bkPending=null; importBox(""); return;}
+  const d=bkPending.data;
+  try{
+    Object.entries(BK_JSON).concat(Object.entries(BK_RAW)).forEach(([k,key])=>{
+      if(d[k]==null) localStorage.removeItem(key); else localStorage.setItem(key,k in BK_RAW?d[k]:JSON.stringify(d[k]));
+    });
+    localStorage.setItem(KEY_SCHEMA,String(bkPending.schemaV)); // al recargar, migrate() lo sube a la versión actual
+    sessionStorage.setItem("hgclock.welcomed","1"); sessionStorage.setItem("hgclock.view","setup");
+  }catch(e){importBox('<p class="hint" style="color:#ff9fb1;margin:10px 0 0">'+T("No se pudo guardar el respaldo en este dispositivo.","Couldn't save the backup on this device.")+'</p>'); return;}
+  location.reload();
 });
 
 // ---------- TODO v2: En vivo ----------
