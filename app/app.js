@@ -1406,9 +1406,11 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 syncToggles(); renderHands(); render(); renderStructure();
 let welcomed=false; try{welcomed=sessionStorage.getItem("hgclock.welcomed")==="1"}catch(e){}
 setLang(LANG);
+// Se lee antes de show("clock"), que sobrescribe la vista guardada (en cash eso mandaba cada recarga al Reloj)
+let bootView=null; try{bootView=sessionStorage.getItem("hgclock.view")}catch(e){}
 renderCash(); if(cfg.mode==="cash") show("clock");
 if(!welcomed&&!cs.started&&freshGame()&&!st.running&&remainingMs()>=durMs(st.idx)) welcomeShow();
-try{const v=sessionStorage.getItem("hgclock.view"); if(v&&v!=="clock") show(v);}catch(e){}
+if(bootView&&bootView!=="clock") show(bootView);
 setInterval(tick,250);
 // PWA: el service worker guarda todo para que la app abra sin internet después de la primera visita
 if("serviceWorker" in navigator&&location.protocol!=="file:") window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js").catch(()=>{}));
