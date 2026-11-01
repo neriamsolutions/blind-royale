@@ -65,14 +65,5 @@ a{color:var(--brass-2)}
     <p>Blind Royale is a nerIAm product. If you have questions about this policy, write to us at <a href="mailto:ramon@neriamsolutions.com">ramon@neriamsolutions.com</a>.</p>
   </section>
 </div>
-<script>
-// Muestra el idioma que eligió el usuario en la app (misma llave hgclock.lang), o ?lang=es|en.
-(()=>{let l="en";try{l=localStorage.getItem("hgclock.lang")||"en"}catch(e){}
-  const q=new URLSearchParams(location.search).get("lang"); if(q==="es"||q==="en") l=q;
-  const b=document.getElementById("lang");
-  const set=x=>{l=x;document.documentElement.lang=x;document.title=(x==="es"?"Privacidad":"Privacy")+" · Blind Royale";
-    document.querySelectorAll("[data-l]").forEach(s=>s.hidden=s.dataset.l!==x);
-    b.textContent=x==="en"?"ES":"EN";b.setAttribute("aria-label",x==="en"?"Cambiar a español":"Switch to English");};
-  b.onclick=()=>set(l==="en"?"es":"en"); set(l);})();
-</script>
+<script src="privacidad.js"></script>
 </body></html>

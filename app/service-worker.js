@@ -2,7 +2,7 @@
 // Estrategia network-first: con conexión siempre se sirve (y se guarda) la versión más nueva,
 // así que cada deploy llega solo; sin conexión se usa la copia guardada.
 // Sube CACHE solo si cambia la lista de archivos (para limpiar copias viejas).
-const CACHE = "blind-royale-v2";
+const CACHE = "blind-royale-v3";
 const FILES = [
   "./",
   "index.html",
@@ -10,6 +10,7 @@ const FILES = [
   "app.js",
   "manifest.webmanifest",
   "privacidad.html",
+  "privacidad.js",
   "icons/icon-192.png",
   "icons/icon-512.png",
   "icons/maskable-512.png",

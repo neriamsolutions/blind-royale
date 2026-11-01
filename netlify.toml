@@ -3,6 +3,16 @@
   publish = "app"
   command = ""
 
+# Seguridad: solo corre JavaScript de este mismo sitio (nada inyectado ni inline).
+# style-src lleva unsafe-inline porque la app pinta estilos en atributos style=.
+# v2: al conectar Lemon Squeezy (u otro servicio) hay que agregar su dominio a connect-src.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"
+
 # Sin caché en lo que decide la versión: así cada deploy llega en la siguiente visita.
 [[headers]]
   for = "/service-worker.js"
