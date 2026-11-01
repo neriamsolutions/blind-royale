@@ -594,7 +594,7 @@ $("btnPreset").onclick=()=>{
 // Ajustes
 function bindNum(id,key){$(id).addEventListener("input",()=>{cfg[key]=Math.max(0,+$(id).value||0);saveCfg();render();if(key==="stack")chipSummary();});}
 $("fName").addEventListener("input",()=>{cfg.name=$("fName").value;saveCfg();render();});
-$("fCur").addEventListener("input",()=>{cfg.cur=$("fCur").value;saveCfg();render();});
+$("fCur").addEventListener("input",()=>{cfg.cur=$("fCur").value.replace(/[<>"]/g,"");saveCfg();render();});
 [["fBuyin","buyin"],["fStack","stack"],["fRebuyCost","rebuyCost"],["fRebuyStack","rebuyStack"],["fRebuyUntil","rebuyUntil"],["fAddonCost","addonCost"],["fAddonStack","addonStack"]].forEach(a=>bindNum(...a));
 $("fRebuyOn").addEventListener("change",()=>{cfg.rebuyOn=$("fRebuyOn").checked;saveCfg();render();});
 $("fAddonOn").addEventListener("change",()=>{cfg.addonOn=$("fAddonOn").checked;saveCfg();render();});
@@ -1355,6 +1355,9 @@ function backupCheck(b){
     if(s==="array"?!Array.isArray(v):s==="object"?(v===null||typeof v!=="object"||Array.isArray(v)):typeof v!==s) return "bad";}
   return "";
 }
+// Un respaldo puede venir de otra persona: sus textos se pintan con innerHTML (moneda, colores, nombres),
+// así que se les quitan < > " para que ninguno pueda volverse HTML o salirse de un atributo.
+function bkClean(v){return typeof v==="string"?v.replace(/[<>"]/g,""):Array.isArray(v)?v.map(bkClean):v&&typeof v==="object"?Object.fromEntries(Object.entries(v).map(([k,x])=>[k,bkClean(x)])):v;}
 function importBox(h){const el=$("importBox"); el.innerHTML=h||""; el.hidden=!h;}
 $("btnExport").onclick=()=>{
   const b=backupData(), url=URL.createObjectURL(new Blob([JSON.stringify(b,null,1)],{type:"application/json"}));
@@ -1378,7 +1381,7 @@ $("fImport").addEventListener("change",async()=>{
 $("importBox").addEventListener("click",e=>{
   const b=e.target.closest("[data-imp]"); if(!b) return;
   if(b.dataset.imp==="no"||!bkPending){bkPending=null; importBox(""); return;}
-  const d=bkPending.data;
+  const d=bkClean(bkPending.data);
   try{
     Object.entries(BK_JSON).concat(Object.entries(BK_RAW)).forEach(([k,key])=>{
       if(d[k]==null) localStorage.removeItem(key); else localStorage.setItem(key,k in BK_RAW?d[k]:JSON.stringify(d[k]));
