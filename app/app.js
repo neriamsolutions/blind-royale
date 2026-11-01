@@ -885,7 +885,7 @@ function stopConfetti(){cancelAnimationFrame(confRAF);const c=$("confetti");c.ge
 // ---------- Idioma (inglés por defecto) ----------
 let LANG="en"; try{LANG=localStorage.getItem("hgclock.lang")||"en"}catch(e){}
 const DICT={"Historial":"History","Mi perfil":"Profile",
-"Respaldo":"Backup","Exportar respaldo":"Export backup","Importar respaldo":"Import backup",
+"Respaldo":"Backup","Exportar respaldo":"Export backup","Importar respaldo":"Import backup","Aviso de privacidad":"Privacy policy",
 "Todo se guarda solo en este dispositivo. Descarga un respaldo de vez en cuando para no perder el historial si cambias de teléfono o borras el navegador.":"Everything is saved only on this device. Download a backup now and then so you don't lose your history if you switch phones or clear the browser.",
 "Reloj":"Clock","Mesa":"Tables","Estructura":"Structure","Ajustes":"Settings","En pausa":"Paused","Nivel":"Level","Ciegas":"Blinds","Siguiente:":"Next:","Anterior":"Previous","Iniciar":"Start","Pausar":"Pause","Continuar":"Resume","Siguiente":"Next",
 "Reiniciar nivel":"Restart level","Sonido: sí":"Sound: on","Sonido: no":"Sound: off","Voz: sí":"Voice: on","Voz: no":"Voice: off","Pantalla completa":"Full screen","Salir de pantalla completa":"Exit full screen","No disponible aquí":"Not available here","Modo TV":"TV mode",
