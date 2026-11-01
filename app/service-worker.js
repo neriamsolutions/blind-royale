@@ -36,18 +36,26 @@ self.addEventListener("activate", e => {
     .then(() => self.clients.claim()));
 });
 
+// Con señal débil (wifi que conecta pero no responde) fetch() puede tardar muchísimo: si en
+// NET_WAIT ms no hay respuesta y existe copia guardada, se sirve esa; la red sigue y actualiza la caché.
+const NET_WAIT = 2000;
 self.addEventListener("fetch", e => {
   const req = e.request;
   if (req.method !== "GET" || new URL(req.url).origin !== location.origin) return;
-  e.respondWith(
+  // ignoreSearch: "?v=…" u otros parámetros no deben romper el modo sin conexión
+  const cached = () => caches.match(req, { ignoreSearch: true })
+    .then(hit => hit || (req.mode === "navigate" ? caches.match("index.html") : undefined));
+  e.respondWith(new Promise(resolve => {
+    let done = false;
+    const finish = res => { if (!done && res) { done = true; resolve(res); } };
+    const timer = setTimeout(() => cached().then(finish), NET_WAIT);
     fetch(req).then(res => {
+      clearTimeout(timer);
       if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
-      return res;
-    }).catch(() =>
-      // ignoreSearch: "?v=…" u otros parámetros no deben romper el modo sin conexión
-      caches.match(req, { ignoreSearch: true })
-        .then(hit => hit || (req.mode === "navigate" ? caches.match("index.html") : undefined))
-        .then(hit => hit || Response.error())
-    )
-  );
+      finish(res);
+    }).catch(() => {
+      clearTimeout(timer);
+      cached().then(hit => finish(hit || Response.error()));
+    });
+  }));
 });
