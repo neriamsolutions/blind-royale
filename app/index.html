@@ -249,6 +249,12 @@
           <button class="btn" id="btnDefaults">Restaurar valores sugeridos</button>
         </div>
       </div>
+      <div class="panel" id="installPanel" hidden>
+        <h2>Instalar app</h2>
+        <p style="margin:0 0 10px;color:var(--muted)">Ponla en la pantalla de inicio: abre a pantalla completa, como cualquier app, y funciona sin internet.</p>
+        <div class="toolbar" style="margin-top:0"><button class="btn" id="btnInstall" type="button">Instalar app</button></div>
+        <div class="ins-ios" id="insIos" data-notr hidden></div>
+      </div>
       <div class="panel">
         <h2>Respaldo</h2>
         <p style="margin:0 0 10px;color:var(--muted)">Todo se guarda solo en este dispositivo. Descarga un respaldo de vez en cuando para no perder el historial si cambias de teléfono o borras el navegador.</p>
@@ -287,6 +293,8 @@
       <button class="linkbtn" id="btnWelcomeSkip" type="button">Ajustar algo antes de empezar</button>
       <button class="linkbtn" id="btnWelcomeBack" type="button" data-notr></button>
     </div>
+    <button class="linkbtn" id="btnInstallW" type="button" hidden>Instalar como app</button>
+    <div class="ins-ios" id="insIosW" data-notr hidden></div>
     <div style="margin-top:6px"><span class="nm-sign"><span class="by">by</span><span class="nm-lock" role="img" aria-label="NerIAm"><svg class="nm-eclipse" viewBox="10 18 68 52" aria-hidden="true"><path d="M41.68 20.68A24 24 0 1 0 41.68 67.32A25.5 25.5 0 0 1 41.68 20.68Z" fill="#F8FAFC"/><path d="M47.95 20.35A24 24 0 1 1 47.95 67.65A26.5 26.5 0 0 0 47.95 20.35Z" fill="#3B82F6"/></svg><span class="nm-word">ner<span>IA</span>m</span></span></span></div>
   </div>
 </div>

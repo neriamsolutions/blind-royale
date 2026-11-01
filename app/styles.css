@@ -356,6 +356,9 @@ kbd{font-family:var(--body);font-size:12px;border:1px solid var(--line);border-r
 .wkind{font-family:var(--display);font-weight:800;letter-spacing:.3em;text-transform:uppercase;font-size:14px;color:#ff9fb1;text-shadow:0 0 10px rgba(255,79,109,.6)}
 @media (max-width:420px){.wopt{padding:16px 8px}.wico{width:48px;height:48px;font-size:26px}}
 .linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:14px;padding:6px}
+/* instalar: pasos de Safari en iPhone (ahí no existe el aviso de instalación) */
+.ins-ios{color:var(--muted);font-size:14px;text-align:left}.ins-ios ol{margin:0;padding-left:22px;display:grid;gap:6px}.ins-ios b{color:var(--ivory)}
+.ov .ins-ios{background:var(--felt-2);border:1px solid var(--line);border-radius:14px;padding:12px 14px;max-width:340px}
 /* cambio de nivel */
 .ko{z-index:65;cursor:pointer;overflow:hidden;background:#050102}
 .ko-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(90,6,14,.95),rgba(5,1,2,1) 72%);opacity:0;pointer-events:none}

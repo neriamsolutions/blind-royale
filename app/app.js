@@ -885,7 +885,7 @@ function stopConfetti(){cancelAnimationFrame(confRAF);const c=$("confetti");c.ge
 // ---------- Idioma (inglés por defecto) ----------
 let LANG="en"; try{LANG=localStorage.getItem("hgclock.lang")||"en"}catch(e){}
 const DICT={"Historial":"History","Mi perfil":"Profile",
-"Respaldo":"Backup","Exportar respaldo":"Export backup","Importar respaldo":"Import backup","Aviso de privacidad":"Privacy policy",
+"Respaldo":"Backup","Instalar app":"Install app","Instalar como app":"Install as an app","Ponla en la pantalla de inicio: abre a pantalla completa, como cualquier app, y funciona sin internet.":"Put it on your home screen: it opens full screen like any app and works offline.","Exportar respaldo":"Export backup","Importar respaldo":"Import backup","Aviso de privacidad":"Privacy policy",
 "Todo se guarda solo en este dispositivo. Descarga un respaldo de vez en cuando para no perder el historial si cambias de teléfono o borras el navegador.":"Everything is saved only on this device. Download a backup now and then so you don't lose your history if you switch phones or clear the browser.",
 "Reloj":"Clock","Mesa":"Tables","Estructura":"Structure","Ajustes":"Settings","En pausa":"Paused","Nivel":"Level","Ciegas":"Blinds","Siguiente:":"Next:","Anterior":"Previous","Iniciar":"Start","Pausar":"Pause","Continuar":"Resume","Siguiente":"Next",
 "Reiniciar nivel":"Restart level","Sonido: sí":"Sound: on","Sonido: no":"Sound: off","Voz: sí":"Voice: on","Voz: no":"Voice: off","Pantalla completa":"Full screen","Salir de pantalla completa":"Exit full screen","No disponible aquí":"Not available here","Modo TV":"TV mode",
@@ -969,7 +969,8 @@ function setLang(l){
   $("btnLang").textContent=l==="en"?"ES":"EN";
   $("btnLang").setAttribute("aria-label",l==="en"?"Cambiar a español":"Switch to English");
   if(!$("welcome").hidden) welcomeShow("keep");
-  if(typeof renderHistory==="function") renderHistory();
+  if(typeof renderHistory==="function") renderHistory();
+  if(typeof renderInstall==="function") renderInstall();
   translateDOM();
 }
 $("btnLang").onclick=()=>setLang(LANG==="en"?"es":"en");
@@ -1399,6 +1400,29 @@ $("importBox").addEventListener("click",e=>{
 // payouts, chips, rebuyOn, rebuyUntil, players[{n,out,place,rb}], champ, updatedAt.
 // La vista mostraba nivel, ciegas, tiempo, stack promedio, bote, premios y quién sigue en pie.
 // Implementación v1 completa en poker-nights-original.html (funciones live*: push, render, listen).
+
+// ---------- Instalar en la pantalla de inicio ----------
+// Chrome/Android avisa con beforeinstallprompt: se guarda para lanzarlo con un toque. Safari en iPhone no tiene
+// ese aviso (ninguna página puede instalarse sola), así que ahí se muestran los pasos. Instalada, no se ofrece nada.
+let insPrompt=null;
+const isIOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+const installed=()=>(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true;
+const iosSteps=()=>'<ol><li>'+T("Abre esta página en <b>Safari</b>.","Open this page in <b>Safari</b>.")+'</li><li>'+
+  T("Toca <b>Compartir</b> (el cuadro con la flecha ↑; si no lo ves, está en el menú <b>···</b>).","Tap <b>Share</b> (the square with the ↑ arrow; if you don't see it, it's in the <b>···</b> menu).")+'</li><li>'+
+  T("Elige <b>Agregar a inicio</b> y toca <b>Agregar</b>.","Choose <b>Add to Home Screen</b> and tap <b>Add</b>.")+'</li></ol>';
+function renderInstall(){
+  const can=!installed()&&(!!insPrompt||isIOS);
+  $("installPanel").hidden=!can; $("btnInstallW").hidden=!can; $("btnInstall").hidden=!insPrompt;
+  $("insIos").hidden=!can||!!insPrompt; if(!can) $("insIosW").hidden=true;
+  if(isIOS){$("insIos").innerHTML=iosSteps(); $("insIosW").innerHTML=iosSteps();}
+}
+async function install(){
+  if(!insPrompt){$("insIosW").hidden=!$("insIosW").hidden; return;}
+  const p=insPrompt; insPrompt=null; p.prompt(); try{await p.userChoice}catch(e){} renderInstall();
+}
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault(); insPrompt=e; renderInstall();});
+window.addEventListener("appinstalled",()=>{insPrompt=null; renderInstall();});
+$("btnInstall").onclick=install; $("btnInstallW").onclick=install;
 
 // Mantener la pantalla encendida mientras corre el reloj
 let wake=null;
