@@ -31,7 +31,7 @@ Una **PWA independiente, de un solo dispositivo**, sin ninguna dependencia de Cl
    - **Importar respaldo** (con confirmación antes de sobrescribir).
    - Versión de esquema en los datos para poder migrar en el futuro.
 5. **PWA:** `manifest.webmanifest` (nombre, íconos 192 y 512, `display: standalone`, colores del tema oscuro), `service-worker.js` que cachee todo para que funcione **sin internet**, y que se pueda instalar en iPhone, Android y tablet. Ojo: las Google Fonts deben quedar cacheadas o descargadas localmente en `/fonts` para que funcione offline.
-6. **Nombre configurable:** el nombre "Poker Nights" ya lo usa otra empresa, así que voy a cambiarlo. Centraliza el nombre de la app en **una sola constante** (y en el manifest) para cambiarlo fácil. Por ahora usa el placeholder `APP_NAME = "Poker Nights"`. Mantén la firma "by nerIAm" tal como está (isotipo Eclipse, Schibsted Grotesk ExtraBold, "IA" en azul #3B82F6).
+6. **Nombre configurable:** el nombre "Poker Nights" ya lo usa otra empresa, así que voy a cambiarlo. Centraliza el nombre de la app en **una sola constante** (y en el manifest) para cambiarlo fácil. Por ahora usa el placeholder `APP_NAME = "Poker Nights"`. Mantén la firma "by nerIAm" tal como está (isotipo Eclipse, Schibsted Grotesk ExtraBold, "IA" en naranja #FF6B1A, identidad v2.0 Verde bosque).
 7. **Netlify:** agrega `netlify.toml` con headers correctos para el service worker (sin caché agresivo en `service-worker.js`) y explícame paso a paso cómo publicarlo en un subdominio `.netlify.app` gratis.
 8. **Página legal mínima:** `privacidad.html` simple en español e inglés: la app no recolecta datos, todo se queda en el dispositivo, no maneja dinero ni apuestas, solo registra resultados.
 

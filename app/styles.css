@@ -31,12 +31,12 @@ header.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-conte
 .wordmark .sub{display:flex;gap:10px;flex-wrap:wrap;align-items:baseline;margin-top:6px;font-size:12px;color:var(--muted)}
 .wordmark .sub #tName{color:var(--brass-2);letter-spacing:.08em;text-transform:uppercase;font-weight:600}
 .by{color:var(--muted);letter-spacing:.04em}
-/* Firma NerIAm según su manual: isotipo Eclipse + logotipo en Schibsted Grotesk 800, IA en azul #3B82F6 sobre oscuro */
+/* Firma NerIAm según su manual: isotipo Eclipse + logotipo en Schibsted Grotesk 800, IA en naranja #FF6B1A (identidad v2.0 Verde bosque) */
 .nm-sign{display:inline-flex;align-items:center;gap:6px}
 .nm-lock{display:inline-flex;align-items:center;gap:.25em;font-size:15px;line-height:1}
 .nm-eclipse{height:.85em;width:auto;flex:none}
-.nm-word{font-family:"Schibsted Grotesk",Arial,sans-serif;font-weight:800;letter-spacing:-.03em;color:#F8FAFC}
-.nm-word span{color:#3B82F6}
+.nm-word{font-family:"Schibsted Grotesk",Arial,sans-serif;font-weight:800;letter-spacing:-.03em;color:#F2F6F5}
+.nm-word span{color:#FF6B1A}
 .by b{color:var(--ivory);font-weight:700;letter-spacing:.02em}
 .by b em{font-style:normal;color:var(--neon);text-shadow:0 0 8px var(--neon-glow)}
 .top-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
