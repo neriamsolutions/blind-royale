@@ -1,0 +1,20 @@
+{
+  "appId": "com.neriamsolutions.blindroyale",
+  "appName": "Blind Royale",
+  "webDir": "../app",
+  "android": {
+    "appendUserAgent": "BlindRoyaleApp",
+    "backgroundColor": "#07120f",
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0,
+      "backgroundColor": "#07120f"
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon",
+      "iconColor": "#ff4f6d"
+    }
+  }
+}
