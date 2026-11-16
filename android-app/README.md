@@ -68,6 +68,10 @@ Fuente en `android-app/assets/` (la ficha del logo, la misma de `app/icons/`). S
 ```
 npx @capacitor/assets generate --android --iconBackgroundColor "#07120f" --splashBackgroundColor "#07120f"
 ```
+Después, en `android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml` y `ic_launcher_round.xml`,
+quita el `<inset … android:inset="16.7%">` que agrega la herramienta y deja la imagen directa
+(`<foreground android:drawable="@mipmap/ic_launcher_foreground" />`): la ficha ya trae su margen, y
+con el inset doble el ícono se veía chico en el teléfono.
 El ícono de las notificaciones es `android/app/src/main/res/drawable/ic_stat_icon.xml` (la pica,
 de un solo color como pide Android).
 
