@@ -7,6 +7,8 @@ const APP_NAME="Blind Royale";
   document.querySelectorAll("[data-app]").forEach(el=>el.textContent=el.dataset.app==="wm-a"?a.toUpperCase():el.dataset.app==="wm-b"?b.join(" "):APP_NAME);})();
 const KEY_CFG="hgclock.cfg.v1", KEY_ST="hgclock.state.v1", KEY_FAV="hgclock.fav.v1";
 const $=id=>document.getElementById(id);
+// En la app de Android, native.js deja aquí vibración, pantalla encendida, Compartir y avisos; en la web es null.
+const NATIVE=window.BRNative||null;
 const fmt=n=>Math.round(n).toLocaleString("en-US");
 
 // Escalera de ciegas pensada para 10,000 fichas con fichas de 25/100/500/1000.
@@ -143,7 +145,7 @@ function goTo(i,{sound=true,keepRunning=true}={}){
   saveSt(); render(); renderStructure();
   if(sound){chimeLevel(); announce(); levelUp();}
 }
-function play(){ audio(); if(st.remaining==null) st.remaining=durMs(st.idx); st.endAt=Date.now()+st.remaining; st.running=true; st.lastTick=Date.now(); saveSt(); render(); requestWake(); }
+function play(){ audio(); if(NATIVE) NATIVE.askNotify(); if(st.remaining==null) st.remaining=durMs(st.idx); st.endAt=Date.now()+st.remaining; st.running=true; st.lastTick=Date.now(); saveSt(); render(); requestWake(); }
 function pause(){ st.remaining=remainingMs(); st.running=false; saveSt(); render(); }
 function adjust(ms){
   if(st.running){st.endAt+=ms; if(st.endAt<Date.now()) st.endAt=Date.now();}
@@ -759,7 +761,7 @@ function knockout(p){
     el.appendChild(e);
   }
   el.hidden=false; el.classList.remove("show"); void el.offsetWidth; el.classList.add("show");
-  koSound(!!ps[place-1]);
+  koSound(!!ps[place-1]); if(NATIVE) NATIVE.vibrate(400);
   if(cfg.voice) setTimeout(()=>{if(!$("ko").hidden)say(LANG==="en"?p.name+", knocked out in "+ordEn(place)+" place.":p.name+", eliminado en "+place+".º lugar.");},3600);
   clearTimeout(koTimer); koTimer=setTimeout(koHide,8500);
 }
@@ -802,7 +804,7 @@ function levelUp(){
     $("luLabel").textContent=n===1?"Nivel 1":"Suben las ciegas · Nivel "+n;
     $("luBlinds").innerHTML=chipHTML(L.sb)+'<span style="color:var(--muted);opacity:.7;margin-inline:.12em">/</span>'+chipHTML(L.bb);
     $("luSub").textContent=+L.ante?"Ante de ciega grande: "+fmt(L.ante):"";}
-  el.hidden=false; el.classList.remove("show"); void el.offsetWidth; el.classList.add("show");
+  el.hidden=false; el.classList.remove("show"); void el.offsetWidth; el.classList.add("show"); if(NATIVE) NATIVE.vibrate(120);
   clearTimeout(luTimer); luTimer=setTimeout(()=>{el.hidden=true;},4200);
 }
 $("lvlup").addEventListener("click",()=>{$("lvlup").hidden=true;});
@@ -1361,10 +1363,14 @@ function backupCheck(b){
 function bkClean(v){return typeof v==="string"?v.replace(/[<>"]/g,""):Array.isArray(v)?v.map(bkClean):v&&typeof v==="object"?Object.fromEntries(Object.entries(v).map(([k,x])=>[k,bkClean(x)])):v;}
 function importBox(h){const el=$("importBox"); el.innerHTML=h||""; el.hidden=!h;}
 $("btnExport").onclick=()=>{
-  const b=backupData(), url=URL.createObjectURL(new Blob([JSON.stringify(b,null,1)],{type:"application/json"}));
-  const a=document.createElement("a"); a.href=url; a.download=APP_NAME.toLowerCase().replace(/\s+/g,"-")+"-"+T("respaldo","backup")+"-"+new Date().toLocaleDateString("en-CA")+".json";
+  const json=JSON.stringify(backupData(),null,1), name=APP_NAME.toLowerCase().replace(/\s+/g,"-")+"-"+T("respaldo","backup")+"-"+new Date().toLocaleDateString("en-CA")+".json";
+  const btn=$("btnExport"), lbl=btn.textContent, done=m=>{btn.textContent=m; setTimeout(()=>btn.textContent=lbl,2200);};
+  // En la app de Android no hay descargas: el respaldo sale por el menú Compartir
+  if(NATIVE){NATIVE.saveFile(name,json,APP_NAME+" · "+T("Respaldo","Backup")).then(ok=>{if(!ok) done(T("No se pudo exportar","Couldn't export"));}); return;}
+  const url=URL.createObjectURL(new Blob([json],{type:"application/json"}));
+  const a=document.createElement("a"); a.href=url; a.download=name;
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
-  const btn=$("btnExport"), lbl=btn.textContent; btn.textContent=T("✓ Respaldo descargado","✓ Backup downloaded"); setTimeout(()=>btn.textContent=lbl,2200);
+  done(T("✓ Respaldo descargado","✓ Backup downloaded"));
 };
 $("btnImport").onclick=()=>{importBox(""); $("fImport").value=""; $("fImport").click();};
 $("fImport").addEventListener("change",async()=>{
@@ -1401,6 +1407,26 @@ $("importBox").addEventListener("click",e=>{
 // La vista mostraba nivel, ciegas, tiempo, stack promedio, bote, premios y quién sigue en pie.
 // Implementación v1 completa en poker-nights-original.html (funciones live*: push, render, listen).
 
+// ---------- App de Android ----------
+// Al salir de la app con el reloj corriendo, native.js agenda un aviso por cada cambio de nivel que viene.
+if(NATIVE) NATIVE.upcoming=()=>{
+  if(cfg.mode==="cash"||!st.running) return [];
+  const out=[]; let at=st.endAt;
+  for(let i=st.idx+1;i<cfg.levels.length&&out.length<12;i++){const L=cfg.levels[i];
+    out.push(L.t==="B"?{at,title:T("Descanso","Break")+" · "+L.min+" min",body:T("Pausa el juego. El reloj sigue corriendo.","Take a break. The clock keeps running.")}
+      :{at,title:T("Suben las ciegas · Nivel ","Blinds up · Level ")+levelNumber(i),body:fmt(L.sb)+" / "+fmt(L.bb)+(+L.ante?" · ante "+fmt(L.ante):"")});
+    at+=durMs(i);}
+  return out;
+};
+// Atrás de Android: cierra la capa de encima (eliminado, cambio de nivel, campeón, modo TV), igual que Escape
+if(NATIVE) NATIVE.onBack=()=>{
+  if(!$("ko").hidden){koHide();return true;}
+  if(!$("gl").hidden){endGoodLuck();return true;}
+  for(const id of ["lvlup","champ"]) if(!$(id).hidden){$(id).hidden=true;stopConfetti();return true;}
+  if(document.body.classList.contains("tv")){setTv(false);return true;}
+  return false;
+};
+
 // ---------- Instalar en la pantalla de inicio ----------
 // Chrome/Android avisa con beforeinstallprompt: se guarda para lanzarlo con un toque. Safari en iPhone no tiene
 // ese aviso (ninguna página puede instalarse sola), así que ahí se muestran los pasos. Instalada, no se ofrece nada.
@@ -1411,7 +1437,7 @@ const iosSteps=()=>'<ol><li>'+T("Abre esta página en <b>Safari</b>.","Open this
   T("Toca <b>Compartir</b> (el cuadro con la flecha ↑; si no lo ves, está en el menú <b>···</b>).","Tap <b>Share</b> (the square with the ↑ arrow; if you don't see it, it's in the <b>···</b> menu).")+'</li><li>'+
   T("Elige <b>Agregar a inicio</b> y toca <b>Agregar</b>.","Choose <b>Add to Home Screen</b> and tap <b>Add</b>.")+'</li></ol>';
 function renderInstall(){
-  const can=!installed()&&(!!insPrompt||isIOS);
+  const can=!NATIVE&&!installed()&&(!!insPrompt||isIOS);
   $("installPanel").hidden=!can; $("btnInstallW").hidden=!can; $("btnInstall").hidden=!insPrompt;
   $("insIos").hidden=!can||!!insPrompt; if(!can) $("insIosW").hidden=true;
   if(isIOS){$("insIos").innerHTML=iosSteps(); $("insIosW").innerHTML=iosSteps();}
@@ -1426,7 +1452,7 @@ $("btnInstall").onclick=install; $("btnInstallW").onclick=install;
 
 // Mantener la pantalla encendida mientras corre el reloj
 let wake=null;
-async function requestWake(){try{if("wakeLock" in navigator&&!wake){wake=await navigator.wakeLock.request("screen");wake.addEventListener("release",()=>wake=null);}}catch(e){}}
+async function requestWake(){if(NATIVE){NATIVE.keepAwake(true);return;}try{if("wakeLock" in navigator&&!wake){wake=await navigator.wakeLock.request("screen");wake.addEventListener("release",()=>wake=null);}}catch(e){}}
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"){if(st.running)requestWake();tick();}});
 
 // Arranque
@@ -1440,5 +1466,5 @@ if(!welcomed&&!cs.started&&freshGame()&&!st.running&&remainingMs()>=durMs(st.idx
 if(bootView&&bootView!=="clock") show(bootView);
 setInterval(tick,250);
 // PWA: el service worker guarda todo para que la app abra sin internet después de la primera visita
-if("serviceWorker" in navigator&&location.protocol!=="file:") window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js").catch(()=>{}));
+if("serviceWorker" in navigator&&location.protocol!=="file:"&&!NATIVE) window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js").catch(()=>{}));
 })();
