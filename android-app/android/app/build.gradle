@@ -18,6 +18,18 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    // Fixed DEBUG key, committed on purpose: GitHub would otherwise sign every test APK with a fresh
+    // throwaway key, and Android refuses to update an app whose signature changed (testers would have
+    // to uninstall and lose their history). It is a debug-only key with the usual public passwords,
+    // not a secret, and it never signs what goes to Play.
+    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }
     buildTypes {
         // Debug builds (CI / "Run" in Android Studio) get their own package id, so they install
         // NEXT TO the Play app instead of colliding with it (same id + different signing key =
@@ -25,6 +37,7 @@ android {
         debug {
             applicationIdSuffix ".debug"
             versionNameSuffix "-debug"
+            signingConfig signingConfigs.debug
         }
         release {
             minifyEnabled false
