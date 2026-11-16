@@ -1,0 +1,50 @@
+# Builds the Capacitor app (android-app/) whenever it or the app itself changes, so a broken Android
+# build shows up as a red check instead of on Ramon's laptop. The output is a DEBUG apk (package
+# com.neriamsolutions.blindroyale.debug) to install on a tester's phone without Play. It also builds
+# the UNSIGNED release .aab: the upload key never lives in GitHub, so that bundle is signed on the
+# laptop before going to Play.
+name: Android build
+
+on:
+  push:
+    branches: [main]
+    paths: ['android-app/**', 'app/**', '.github/workflows/android.yml']
+  pull_request:
+    paths: ['android-app/**', 'app/**', '.github/workflows/android.yml']
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: android-app/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm ci
+      - run: npx cap sync android
+      - name: Build debug APK
+        working-directory: android-app/android
+        run: ./gradlew assembleDebug --no-daemon
+      - name: Build release bundle (unsigned)
+        working-directory: android-app/android
+        run: ./gradlew bundleRelease --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: blind-royale-release-unsigned-aab
+          path: android-app/android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: blind-royale-debug-apk
+          path: android-app/android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 14
