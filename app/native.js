@@ -52,4 +52,20 @@
   // Atrás cierra la capa de encima; si no hay nada que cerrar, minimiza en vez de cerrar la app (el reloj sigue)
   on("App","backButton",function(){if(!(typeof N.onBack==="function"&&N.onBack())) call("App","minimizeApp").catch(function(){});});
   clear();
+
+  // Tienda. Por ahora solo existe la de PRUEBA, y solo en el APK de prueba (paquete .debug): simula la
+  // compra sin cobrar nada, para probar la noche gratis y el desbloqueo. Una versión de Play no tiene
+  // tienda hasta conectar Google Play Billing (RevenueCat), así que ahí todo sigue libre.
+  call("App","getInfo").then(function(info){
+    if(!/\.debug$/.test((info&&info.id)||"")) return;
+    var K="hgclock.unlock", has=function(){try{return localStorage.getItem(K)==="1";}catch(e){return false;}};
+    N.store={
+      test:true,
+      price:function(){return Promise.resolve("$19.99");},
+      owned:function(){return Promise.resolve(has());},
+      buy:function(){return new Promise(function(r){setTimeout(function(){r(true);},700);});},
+      restore:function(){return Promise.resolve(has());}
+    };
+    window.dispatchEvent(new Event("brstore"));
+  }).catch(function(){});
 })();

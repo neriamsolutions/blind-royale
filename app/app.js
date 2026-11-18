@@ -174,7 +174,7 @@ function tick(){
     }
     if(now-(tick.lastSave||0)>5000){tick.lastSave=now;saveSt();}
   } else st.lastTick=0;
-  renderClock();
+  markNight(); renderClock();
 }
 
 // ---------- Render ----------
@@ -473,7 +473,7 @@ $("btnPlay").onclick=()=>{
   if(!$("gl").hidden) return;
   if(st.running){pause();return;}
   // Primer arranque de la noche: animación de "Good luck" antes de correr el reloj
-  if(st.idx===0&&!st.elapsedMs&&remainingMs()>=durMs(0)){audio();goodLuck();return;}
+  if(st.idx===0&&!st.elapsedMs&&remainingMs()>=durMs(0)){audio();nightGate(goodLuck);return;}
   play();
 };
 $("btnNext").onclick=()=>goTo(st.idx+1);
@@ -639,9 +639,10 @@ function welcomeShow(step){
     $("wNames").innerHTML=cp.map(p=>"<span>"+esc(p.name)+"</span>").join("");}
   $("welcome").hidden=false;
 }
-$("btnDeal").onclick=()=>{$("welcome").hidden=true;try{sessionStorage.setItem("hgclock.welcomed","1")}catch(e){} show("clock");audio();
-  if(cfg.mode==="cash"){if(cs.started){if(!cs.running)toggleSession();return;}glAfter=()=>{startSession();chimeLevel();};}
-  goodLuck();};
+$("btnDeal").onclick=()=>{
+  const deal=()=>{$("welcome").hidden=true;try{sessionStorage.setItem("hgclock.welcomed","1")}catch(e){} show("clock");audio();};
+  if(cfg.mode==="cash"&&cs.started){deal();if(!cs.running)toggleSession();return;} // retomar la noche de cash, nunca se bloquea
+  nightGate(()=>{deal(); if(cfg.mode==="cash") glAfter=()=>{startSession();chimeLevel();}; goodLuck();});};
 document.querySelectorAll("#wPick .wopt").forEach(b=>b.addEventListener("click",()=>{audio();clack(0,.5);setMode(b.dataset.m);welcomeShow("main");}));
 $("btnWelcomeBack").onclick=()=>welcomeShow();
 // Buena suerte: letrero de neón, cartas repartidas y fichas; luego arranca el reloj
@@ -971,8 +972,9 @@ function setLang(l){
   $("btnLang").textContent=l==="en"?"ES":"EN";
   $("btnLang").setAttribute("aria-label",l==="en"?"Cambiar a español":"Switch to English");
   if(!$("welcome").hidden) welcomeShow("keep");
-  if(typeof renderHistory==="function") renderHistory();
-  if(typeof renderInstall==="function") renderInstall();
+  if(typeof renderHistory==="function") renderHistory();
+  if(typeof renderInstall==="function") renderInstall();
+  if(typeof renderLic==="function"){renderLic(); if(!$("pay").hidden) payShow();}
   translateDOM();
 }
 $("btnLang").onclick=()=>setLang(LANG==="en"?"es":"en");
@@ -1013,7 +1015,7 @@ function setMode(m){
 }
 function startSession(){cs.started=true;cs.running=true;cs.startAt=Date.now();saveCash();requestWake();renderCash();}
 function toggleSession(){
-  if(!cs.started){audio();glAfter=()=>{startSession();chimeLevel();};goodLuck();return;}
+  if(!cs.started){audio();nightGate(()=>{glAfter=()=>{startSession();chimeLevel();};goodLuck();});return;}
   if(cs.running){cs.elapsed+=Date.now()-cs.startAt;cs.running=false;}else{cs.running=true;cs.startAt=Date.now();requestWake();}
   saveCash();renderCash();
 }
@@ -1406,6 +1408,69 @@ $("importBox").addEventListener("click",e=>{
 // payouts, chips, rebuyOn, rebuyUntil, players[{n,out,place,rb}], champ, updatedAt.
 // La vista mostraba nivel, ciegas, tiempo, stack promedio, bote, premios y quién sigue en pie.
 // Implementación v1 completa en poker-nights-original.html (funciones live*: push, render, listen).
+
+// ---------- Primera noche gratis ----------
+// La primera noche (torneo o cash) es completa y gratis; para empezar otra hay que desbloquear la app.
+// Solo aplica donde se puede pagar (la app de la tienda, NATIVE.store): en la web, sin tienda, todo
+// sigue libre, y nadie queda atorado sin forma de pagar. Una noche cuenta al pasar 20 min de juego,
+// para que un arranque en falso o un reinicio para corregir la estructura no gaste la noche gratis.
+// Reanudar una noche ya empezada nunca se bloquea: el candado solo está al empezar una nueva.
+const KEY_NIGHTS="hgclock.nights", KEY_UNLOCK="hgclock.unlock", FREE_NIGHTS=1, NIGHT_MS=20*60000, PRICE="$19.99";
+let nights=load(KEY_NIGHTS)||[], unlocked=false, payGo=null;
+try{unlocked=localStorage.getItem(KEY_UNLOCK)==="1"}catch(e){}
+if(!Array.isArray(nights)) nights=[];
+const STORE=()=>(NATIVE&&NATIVE.store)||null;
+const nightsUsed=()=>Math.max(nights.length,HIST.length);
+function nightGate(go){
+  if(STORE()&&!unlocked&&nightsUsed()>=FREE_NIGHTS){payGo=go;payShow();return;}
+  const id="n"+Date.now(); if(cfg.mode==="cash"){cs.nid=id;saveCash();}else{st.nid=id;saveSt();}
+  go();
+}
+function markNight(){
+  const c=cfg.mode==="cash", t=c?cs:st, ms=c?(cs.elapsed||0)+(cs.running?Date.now()-cs.startAt:0):st.elapsedMs;
+  if(t.nid&&ms>=NIGHT_MS&&!nights.includes(t.nid)){nights.push(t.nid);save(KEY_NIGHTS,nights);renderLic();}
+}
+function setUnlocked(v){unlocked=!!v;try{v?localStorage.setItem(KEY_UNLOCK,"1"):localStorage.removeItem(KEY_UNLOCK)}catch(e){} renderLic();}
+const payBtns=()=>'<button class="btn deal" type="button" data-pay="buy">'+T("Desbloquear","Unlock")+' · <span data-pay-price>'+PRICE+'</span></button>'+
+  '<button class="linkbtn" type="button" data-pay="restore">'+T("Restaurar compra","Restore purchase")+'</button>';
+function payShow(){
+  const s=STORE(); if(!s) return;
+  $("pay").innerHTML='<div class="ov-in">'+$("welcome").querySelector(".logo").outerHTML+
+    '<h2>'+T("Esa fue tu noche gratis","That was your free night")+'</h2>'+
+    '<p class="pay-sub">'+T("Desbloquea Blind Royale para todas tus noches: un solo pago y es tuya para siempre.","Unlock Blind Royale for every game night: one payment, yours forever.")+'</p>'+
+    '<ul><li>'+T("Torneos y noches de cash sin límite","Unlimited tournaments and cash nights")+'</li><li>'+T("Todo tu historial y las estadísticas de cada jugador","Your full history and every player's stats")+'</li><li>'+T("Modo TV, sonidos y animaciones","TV mode, sounds and animations")+'</li></ul>'+
+    '<div class="pay-fine">'+T("Sin suscripción · Sin anuncios · Sin cuenta","No subscription · No ads · No account")+'</div>'+payBtns()+
+    '<p class="pay-err" id="payErr"></p>'+
+    (s.test?'<span class="pay-test">'+T("Tienda de prueba: no se cobra nada","Test store: nothing is charged")+'</span>':'')+
+    '<button class="linkbtn" type="button" data-pay="close">'+T("Ahora no · tu historial sigue disponible","Not now · your history stays available")+'</button></div>';
+  $("pay").hidden=false; payPrice();
+}
+function payPrice(){const s=STORE(); if(s) s.price().then(p=>{if(p) document.querySelectorAll("[data-pay-price]").forEach(el=>el.textContent=p);}).catch(()=>{});}
+function payHide(){$("pay").hidden=true; payGo=null;}
+async function payAct(kind,btn){
+  const s=STORE(); if(!s) return; const err=$("payErr"), lbl=btn.innerHTML;
+  btn.disabled=true; btn.textContent="…"; if(err) err.textContent="";
+  let ok=false; try{ok=kind==="buy"?await s.buy():await s.restore();}catch(e){}
+  btn.disabled=false; btn.innerHTML=lbl; payPrice();
+  if(ok){setUnlocked(true); const go=payGo; payGo=null; $("pay").hidden=true; if(go) nightGate(go); return;}
+  const msg=kind==="buy"?T("No se completó la compra. No se te cobró nada.","The purchase didn't go through. You weren't charged."):T("No encontramos una compra en esta cuenta de la tienda.","We couldn't find a purchase on this store account.");
+  if(err) err.textContent=msg; else{const p=$("licPanel").querySelector(".pay-err"); if(p) p.textContent=msg;}
+}
+function payClick(e){const b=e.target.closest("[data-pay]"); if(!b) return; if(b.dataset.pay==="close"){payHide();return;} payAct(b.dataset.pay,b);}
+$("pay").addEventListener("click",payClick); $("licPanel").addEventListener("click",payClick);
+function renderLic(){
+  const el=$("licPanel"), s=STORE(); el.hidden=!s; if(!s) return;
+  const left=Math.max(0,FREE_NIGHTS-nightsUsed());
+  el.innerHTML='<h2>Blind Royale</h2>'+(unlocked
+    ?'<p class="lic-ok" style="margin:0">✓ '+T("Desbloqueada. ¡Gracias por tu compra!","Unlocked. Thanks for your purchase!")+'</p>'
+    :'<p style="margin:0 0 10px;color:var(--muted)">'+(left?T("Tu primera noche es gratis y completa. Para las siguientes, desbloquea la app con un solo pago.","Your first night is free, with everything included. For the next ones, unlock the app with one payment.")
+      :T("Ya usaste tu noche gratis. Desbloquea la app con un solo pago para seguir jugando.","You've used your free night. Unlock the app with one payment to keep playing."))+'</p>'+
+     '<div class="toolbar" style="margin-top:0;align-items:center">'+payBtns().replace("btn deal","btn primary")+'</div><p class="pay-err" style="margin:6px 0 0"></p>'+
+     (s.test?'<span class="pay-test" style="color:var(--brass-2);font-size:12px">'+T("Tienda de prueba: no se cobra nada","Test store: nothing is charged")+'</span>':''));
+  if(!unlocked) payPrice();
+}
+// native.js avisa cuando la tienda está lista; la compra se confirma con la tienda, no solo con este teléfono
+window.addEventListener("brstore",()=>{const s=STORE(); renderLic(); if(s) s.owned().then(v=>{if(v&&!unlocked) setUnlocked(true);}).catch(()=>{});});
 
 // ---------- App de Android ----------
 // Al salir de la app con el reloj corriendo, native.js agenda un aviso por cada cambio de nivel que viene.

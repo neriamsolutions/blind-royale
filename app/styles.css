@@ -329,6 +329,16 @@ kbd{font-family:var(--body);font-size:12px;border:1px solid var(--line);border-r
 .ov{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;background:radial-gradient(ellipse at 50% 40%,rgba(18,58,48,.92),rgba(4,10,8,.97));overflow:auto}
 .ov-in{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;max-width:640px;width:100%}
 .ov .logo.big{width:96px;height:96px}
+/* desbloqueo: aparece al empezar la segunda noche */
+.pay{z-index:62;background:radial-gradient(ellipse at 50% 40%,#123a30,#050c0a)}
+.pay h2{font-family:var(--display);font-weight:800;font-size:clamp(26px,6vw,40px);letter-spacing:.04em;text-transform:uppercase;margin:4px 0 0;line-height:1.05}
+.pay .pay-sub{color:var(--muted);font-size:16px;max-width:420px;margin:0}
+.pay ul{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:8px;text-align:left}
+.pay li{display:flex;gap:10px;align-items:center;font-size:16px}.pay li::before{content:"♠";color:var(--neon);text-shadow:0 0 8px var(--neon-glow)}
+.pay .pay-fine{color:var(--muted);font-size:13px;letter-spacing:.04em}
+.pay .pay-test{color:var(--brass-2);font-size:12px;border:1px dashed var(--brass);border-radius:999px;padding:3px 12px}
+.pay .pay-err{color:#ff9fb1;font-size:14px;min-height:1.2em;margin:0}
+.lic-ok{color:var(--brass-2);font-weight:700}
 .ov .wm{display:flex;align-items:baseline;gap:8px;justify-content:center;flex-wrap:wrap}
 .ov .wm .wm-a{font-family:var(--display);font-weight:900;font-size:clamp(44px,9vw,72px);letter-spacing:.2em;line-height:1}
 .ov .wm .wm-b{font-family:var(--script);font-size:clamp(54px,11vw,88px);color:#ffd9df;transform:rotate(-5deg);display:inline-block;text-shadow:0 0 6px var(--neon),0 0 18px var(--neon),0 0 40px var(--neon-glow);line-height:1}
